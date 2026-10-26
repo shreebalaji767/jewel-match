@@ -15,15 +15,15 @@ Once GitHub Pages is enabled, play at:
 3. Match 3 or more gems of the same colour to score points.
 4. Chain reactions and larger matches earn more points.
 5. Reach **1,500 points in 25 moves** to complete the quest.
-6. Use **Hint**, **Pause**, **Restart**, and **Exit to home** when needed.
+6. Use **Hint**, **Pause**, **Restart**, and **Exit to home** when needed. On touch screens, swipe a gem toward an adjacent gem to swap it.\n7. If the board runs out of valid moves, the game refreshes the board automatically.
 
-Sound effects are generated in the browser with the Web Audio API. Your best score is saved locally in your browser.
+Sound effects are generated in the browser with the Web Audio API. Sound preference and your best score are saved locally in your browser. The game supports tap/click and swipe controls, gives hints, and automatically reshuffles stuck boards.
 
 ## Files
 
 - `index.html` — landing page, game board, dialogs, and controls
 - `css/style.css` — responsive layout, gem styling, effects, and animations
-- `js/game.js` — board generation, swaps, matching, scoring, cascades, hints, and controls
+- `js/game.js` — board generation, swaps, matching, scoring, cascades, hints, swipe controls, stuck-board recovery, and dialogs
 - `favicon.svg` — custom vector icon
 
 ## Publish with GitHub Pages
