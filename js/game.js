@@ -603,9 +603,35 @@
     }
   });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !modalBackdrop.classList.contains('hidden')) {
+    const key = event.key.toLowerCase();
+    const modalOpen = !modalBackdrop.classList.contains('hidden');
+    if (event.key === 'Escape' && modalOpen) {
       if (paused && !gameScreen.classList.contains('hidden')) return;
       hideModal();
+      return;
+    }
+    if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || modalOpen ||
+        gameScreen.classList.contains('hidden') || event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    if (key === 'p' || key === ' ') {
+      event.preventDefault();
+      if (paused) {
+        paused = false;
+        hideModal();
+      } else {
+        pauseGame();
+      }
+    } else if (key === 'h') {
+      hint();
+    } else if (key === 'r') {
+      showModal({
+        symbol: '↻', eyebrow: 'A FRESH BEGINNING', title: 'Restart round?',
+        copy: 'Your current score and moves will reset. Ready for another go?',
+        actions: [
+          { label: 'Start fresh', run: () => startGame(currentMode) },
+          { label: 'Keep this round', run: () => { paused = false; hideModal(); } }
+        ]
+      });
+      paused = true;
     }
   });
 
