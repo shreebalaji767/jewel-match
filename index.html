@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101020">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jewel Match">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./favicon.svg">
   <meta name="description" content="Jewel Match — a sparkling, free match-three puzzle game.">
   <title>Jewel Match — Crystal Quest</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
@@ -15,10 +21,11 @@
   <div class="ambient ambient-two" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="./" aria-label="Jewel Match home">
-      <span class="brand-gem" aria-hidden="true">✦</span>
+      <img class="brand-logo" src="./favicon.svg" alt="" aria-hidden="true">
       <span>JEWEL<span class="brand-light">MATCH</span></span>
     </a>
     <div class="top-actions">
+      <button class="install-button" id="install-button" type="button"><span class="install-icon">⇩</span><span class="install-label">Install app</span></button>
       <button class="icon-button" id="sound-toggle" type="button" aria-label="Toggle sound" title="Toggle sound">♫</button>
       <button class="icon-button" id="how-button" type="button" aria-label="How to play" title="How to play">?</button>
     </div>
