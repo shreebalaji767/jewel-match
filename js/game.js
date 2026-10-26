@@ -618,6 +618,29 @@
     }
     if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || modalOpen ||
         gameScreen.classList.contains('hidden') || event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const activeTile = event.target.closest('.tile');
+    if (activeTile && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      event.preventDefault();
+      const row = Number(activeTile.dataset.row);
+      const col = Number(activeTile.dataset.col);
+      const delta = {
+        ArrowUp: [-1, 0], ArrowDown: [1, 0],
+        ArrowLeft: [0, -1], ArrowRight: [0, 1]
+      }[event.key];
+      const nextRow = Math.max(0, Math.min(SIZE - 1, row + delta[0]));
+      const nextCol = Math.max(0, Math.min(SIZE - 1, col + delta[1]));
+      boardElement.querySelector('.tile[data-row="' + nextRow + '"][data-col="' + nextCol + '"]')?.focus();
+      return;
+    }
+    if (key === 'm') {
+      soundOn = !soundOn;
+      try { localStorage.setItem('jewel-match-sound', soundOn ? 'on' : 'off'); } catch (_) {}
+      $('#sound-toggle').textContent = soundOn ? '♫' : '♪';
+      $('#sound-toggle').setAttribute('aria-label', soundOn ? 'Mute sound' : 'Enable sound');
+      showToast(soundOn ? 'Sound enabled' : 'Sound muted');
+      if (soundOn) playTone(620, .08);
+      return;
+    }
     if (key === 'p' || key === ' ') {
       event.preventDefault();
       if (paused) {
