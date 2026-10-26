@@ -50,6 +50,27 @@
     $('#best-game').textContent = 'BEST  ' + best.toLocaleString();
     const streakNode = $('#streak-home');
     if (streakNode) streakNode.textContent = dailyStreak;
+    const dailyBestNode = $('#daily-best-home');
+    if (dailyBestNode) dailyBestNode.textContent = 'TODAY  ' + readTodayBest().toLocaleString();
+  }
+
+  function todayKey() {
+    const date = new Date();
+    return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+  }
+
+  function readTodayBest() {
+    try { return Number(localStorage.getItem('jewel-match-daily-best-' + todayKey())) || 0; } catch (_) { return 0; }
+  }
+
+  function saveDailyBest() {
+    if (currentMode !== 'daily') return;
+    const oldBest = readTodayBest();
+    if (score <= oldBest) return;
+    try { localStorage.setItem('jewel-match-daily-best-' + todayKey(), String(score)); } catch (_) {}
+    const dailyBestNode = $('#daily-best-home');
+    if (dailyBestNode) dailyBestNode.textContent = 'TODAY  ' + score.toLocaleString();
+    if (oldBest > 0) showToast('New daily best: ' + score.toLocaleString() + '!');
   }
 
   function randomType() { return TYPES[Math.floor(Math.random() * TYPES.length)]; }
@@ -343,7 +364,12 @@
     });
     const powerBonus = longestRun >= 5 ? 500 : longestRun === 4 ? 250 : 0;
     score += matches.length * 60 * (chain + 1) + powerBonus;
-    if (score > best) best = score;
+    if (score > best) {
+      const isNewBest = score > best;
+      best = score;
+      if (isNewBest && best > 0) showToast('Personal best: ' + best.toLocaleString() + '!');
+    }
+    saveDailyBest();
     updateStats();
     if (longestRun < 4) {
       message.textContent = chain > 0 ? 'Combo x' + (chain + 1) + '! Beautiful chain reaction!' : 'Lovely match! Keep it going.';
@@ -519,7 +545,7 @@
   function showHowToPlay() {
     showModal({
       symbol: '✧', eyebrow: 'YOUR CRYSTAL GUIDE', title: 'How to play',
-      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Bigger matches and chain reactions score more. Reach 1,500 points before your 25 moves run out!',
+      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a row creates a Crystal Burst; five creates a Prism Blast. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
         { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
