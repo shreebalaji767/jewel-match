@@ -340,8 +340,7 @@
     if (!matches.length && !forcedBombs.length) return;
 
     const cleared = new Set(matches.map(([row, col]) => row + ',' + col));
-    const matchSet = new Set(cleared);
-    const runs = [];
+        const runs = [];
     for (let row = 0; row < SIZE; row++) {
       for (let col = 0; col < SIZE; col++) {
         const type = gemType(board[row][col]);
@@ -364,14 +363,20 @@
         : { row: run.row + offset, col: run.col, power: run.length >= 5 ? 'color' : 'column', type: run.type };
     }
 
-    const bombsToTrigger = [...forcedBombs];
+    const bombQueue = [...forcedBombs];
     matches.forEach(([row, col]) => {
-      if (isBomb(board[row][col])) bombsToTrigger.push({ row, col });
+      if (isBomb(board[row][col])) bombQueue.push({ row, col });
     });
-    for (const bomb of bombsToTrigger) {
+    const triggeredBombs = new Set();
+    while (bombQueue.length) {
+      const bomb = bombQueue.shift();
+      const bombKey = bomb.row + ',' + bomb.col;
+      if (triggeredBombs.has(bombKey)) continue;
+      triggeredBombs.add(bombKey);
       const gem = board[bomb.row]?.[bomb.col];
       const power = gemPower(gem);
       const type = gemType(gem);
+      if (!power) continue;
       if (power === 'color') {
         for (let row = 0; row < SIZE; row++) {
           for (let col = 0; col < SIZE; col++) {
@@ -386,7 +391,15 @@
         for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
         message.textContent = 'COLUMN BOMB! The whole column explodes!';
       }
+      // Bombs caught in an explosion chain-detonate, just like in match-three arcade games.
+      for (const key of cleared) {
+        if (!triggeredBombs.has(key)) {
+          const [row, col] = key.split(',').map(Number);
+          if (isBomb(board[row]?.[col])) bombQueue.push({ row, col });
+        }
+      }
     }
+    const bombsToTrigger = [...triggeredBombs].map((key) => key.split(',').map(Number));
 
     if (specialPosition) {
       cleared.delete(specialPosition.row + ',' + specialPosition.col);
@@ -398,7 +411,7 @@
       const tile = boardElement.querySelector('.tile[data-row="' + row + '"][data-col="' + col + '"]');
       if (tile) tile.classList.add('matching');
     });
-    const powerBonus = runs.some((run) => run.length >= 5) ? 500 : runs.length ? 250 : 0;
+    const powerBonus = (runs.some((run) => run.length >= 5) ? 500 : runs.length ? 250 : 0) + Math.max(0, triggeredBombs.size - 1) * 150;
     score += clearCoords.length * 60 * (chain + 1) + powerBonus;
     if (score > best) {
       best = score;
@@ -412,7 +425,7 @@
     if (!runs.length && !bombsToTrigger.length) {
       message.textContent = chain > 0 ? 'Combo x' + (chain + 1) + '! Beautiful chain reaction!' : 'Lovely match! Keep it going.';
     }
-    playTone(bombsToTrigger.length ? 780 : 440 + Math.min(clearCoords.length, 8) * 65, bombsToTrigger.length ? .22 : .13, 'triangle');
+    playTone(triggeredBombs.size ? 780 : 440 + Math.min(clearCoords.length, 8) * 65, triggeredBombs.size ? .22 : .13, 'triangle');
     await sleep(230);
     if (runId !== gameRun) return;
     clearCoords.forEach(([row, col]) => {
