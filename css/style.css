@@ -205,3 +205,11 @@ img,svg,video,canvas{max-width:100%}
 .daily-arrow{margin-left:auto;color:#e8c8ff;font-size:18px}
 @media(max-width:480px){.hero-actions{gap:8px}.hero-actions .primary-button{min-width:0;flex:1;padding:13px 12px}.daily-button{min-width:0;flex:1;padding:8px}.daily-button small{font-size:8px}}
 @media(max-width:350px){.hero-actions{flex-direction:column}.hero-actions .primary-button,.hero-actions .daily-button{width:100%;justify-content:space-between}}
+
+
+/* Personal progress */
+.streak-stat strong{color:#f6d39b}
+.streak-stat{position:relative}
+.streak-stat::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:1px;background:var(--line)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+button:focus-visible,a:focus-visible{outline:3px solid #f8dba3;outline-offset:3px}
