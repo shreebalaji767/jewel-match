@@ -610,6 +610,12 @@
       hideModal();
       return;
     }
+    if (modalOpen && paused && (key === 'p' || key === ' ') && modalTitle.textContent === 'Paused') {
+      event.preventDefault();
+      paused = false;
+      hideModal();
+      return;
+    }
     if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || modalOpen ||
         gameScreen.classList.contains('hidden') || event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
     if (key === 'p' || key === ' ') {
