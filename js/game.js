@@ -32,6 +32,8 @@
   let gameRun = 0;
   let pointerStart = null;
   let best = readBest();
+  let runBestAtStart = best;
+  let personalBestCelebrated = false;
   let dailyStreak = readDailyStreak();
   try { soundOn = localStorage.getItem('jewel-match-sound') !== 'off'; } catch (_) {}
 
@@ -196,6 +198,8 @@
     }
     $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : 'CRYSTAL QUEST';
     gameRun++;
+    runBestAtStart = best;
+    personalBestCelebrated = false;
     clearTimeout(hintTimer);
     homeScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
@@ -367,7 +371,10 @@
     if (score > best) {
       const isNewBest = score > best;
       best = score;
-      if (isNewBest && best > 0) showToast('Personal best: ' + best.toLocaleString() + '!');
+      if (isNewBest && best > runBestAtStart && !personalBestCelebrated) {
+        personalBestCelebrated = true;
+        showToast('New personal best!');
+      }
     }
     saveDailyBest();
     updateStats();
