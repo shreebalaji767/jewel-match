@@ -363,9 +363,17 @@
         : { row: run.row + offset, col: run.col, power: run.length >= 5 ? 'color' : 'column', type: run.type };
     }
 
-    const bombQueue = [...forcedBombs];
+    const bombQueue = [];
+    const queuedBombs = new Set();
+    const enqueueBomb = (row, col) => {
+      const key = row + ',' + col;
+      if (queuedBombs.has(key)) return;
+      queuedBombs.add(key);
+      bombQueue.push({ row, col });
+    };
+    forcedBombs.forEach(({ row, col }) => enqueueBomb(row, col));
     matches.forEach(([row, col]) => {
-      if (isBomb(board[row][col])) bombQueue.push({ row, col });
+      if (isBomb(board[row][col])) enqueueBomb(row, col);
     });
     const triggeredBombs = new Set();
     while (bombQueue.length) {
@@ -395,7 +403,7 @@
       for (const key of cleared) {
         if (!triggeredBombs.has(key)) {
           const [row, col] = key.split(',').map(Number);
-          if (isBomb(board[row]?.[col])) bombQueue.push({ row, col });
+          if (isBomb(board[row]?.[col])) enqueueBomb(row, col);
         }
       }
     }
