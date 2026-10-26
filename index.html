@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101020">
+  <meta name="description" content="Jewel Match — a sparkling, free match-three puzzle game.">
+  <title>Jewel Match — Crystal Quest</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/style.css">
+  <script src="./js/game.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Jewel Match home">
+      <span class="brand-gem" aria-hidden="true">✦</span>
+      <span>JEWEL<span class="brand-light">MATCH</span></span>
+    </a>
+    <div class="top-actions">
+      <button class="icon-button" id="sound-toggle" type="button" aria-label="Toggle sound" title="Toggle sound">♫</button>
+      <button class="icon-button" id="how-button" type="button" aria-label="How to play" title="How to play">?</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section id="home-screen" class="screen home-screen">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> A LITTLE MAGIC IN EVERY MOVE</div>
+        <h1>Find your<br><span>inner sparkle.</span></h1>
+        <p class="hero-description">Swap shimmering gems, create dazzling combos, and journey through a world of crystal wonder.</p>
+        <div class="hero-stats">
+          <div><strong>✦ 6</strong><span>Gem types</span></div>
+          <div><strong>∞</strong><span>Combos</span></div>
+          <div><strong>♡</strong><span>Just for fun</span></div>
+        </div>
+        <button class="primary-button" id="play-button" type="button"><span>Play now</span><span class="button-arrow">↗</span></button>
+        <p class="microcopy">FREE TO PLAY <span>•</span> NO DOWNLOAD NEEDED</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="hero-glow"></div>
+        <div class="showcase-gem gem ruby showcase-ruby"></div>
+        <div class="showcase-gem gem sapphire showcase-sapphire"></div>
+        <div class="showcase-gem gem emerald showcase-emerald"></div>
+        <div class="showcase-gem gem amethyst showcase-amethyst"></div>
+        <div class="showcase-gem gem topaz showcase-topaz"></div>
+        <div class="showcase-gem gem diamond showcase-diamond"></div>
+        <div class="spark spark-a">✦</div><div class="spark spark-b">✧</div><div class="spark spark-c">✦</div>
+        <div class="art-caption"><span class="caption-line"></span><span>THE CRYSTAL REALM</span><span class="caption-line"></span></div>
+      </div>
+      <div class="home-footer"><span>✧ TAKE A BREATH. MAKE A MATCH. ✧</span><span id="best-home">BEST SCORE&nbsp; 0</span></div>
+    </section>
+
+    <section id="game-screen" class="screen game-screen hidden" aria-label="Jewel Match game">
+      <div class="game-heading">
+        <button class="back-button" id="exit-button" type="button" aria-label="Exit game">← <span>Home</span></button>
+        <div><div class="eyebrow centered-eyebrow">CRYSTAL QUEST</div><h2>Make it <span>sparkle.</span></h2></div>
+        <button class="icon-button" id="pause-button" type="button" aria-label="Pause game" title="Pause">Ⅱ</button>
+      </div>
+      <div class="score-strip">
+        <div class="score-card"><span class="stat-label">SCORE</span><strong id="score-value">0</strong></div>
+        <div class="score-card goal-card"><span class="stat-label">TARGET</span><strong id="target-value">1,500</strong></div>
+        <div class="score-card"><span class="stat-label">MOVES</span><strong id="moves-value">25</strong></div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <p class="game-tip" id="game-message" aria-live="polite">Match 3 or more gems of the same kind.</p>
+      <div class="board-frame"><div id="game-board" class="game-board" role="grid" aria-label="Jewel board"></div></div>
+      <div class="game-controls">
+        <button class="secondary-button" id="hint-button" type="button">✧ <span>Hint</span></button>
+        <p>SWAP ADJACENT GEMS <span>•</span> MATCH 3+</p>
+        <button class="secondary-button" id="restart-button" type="button">↻ <span>Restart</span></button>
+      </div>
+      <div class="game-footer"><span>✦ CRYSTALS ARE WAITING ✦</span><span id="best-game">BEST&nbsp; 0</span></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="presentation">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-symbol" id="modal-symbol">✦</div>
+      <p class="eyebrow centered-eyebrow" id="modal-eyebrow">A MOMENT TO SHINE</p>
+      <h2 id="modal-title">Paused</h2>
+      <p class="modal-copy" id="modal-copy">Take your time. Your gems will be right here.</p>
+      <div class="modal-actions" id="modal-actions"></div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
