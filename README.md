@@ -8,6 +8,11 @@ Once GitHub Pages is enabled, play at:
 
 **https://shreebalaji767.github.io/jewel-match/**
 
+## Game modes
+
+- **Crystal Quest:** reach 1,500 points in 25 moves.
+- **Daily Challenge:** a date-based target that changes each day, with 20 moves to beat it.
+
 ## How to play
 
 1. Press **Play now**.
