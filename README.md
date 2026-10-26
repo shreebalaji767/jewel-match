@@ -19,7 +19,7 @@ Once GitHub Pages is enabled, play at:
 2. Select a gem, then select an adjacent gem to swap.
 3. Match 3 or more gems of the same colour to score points.
 4. Match 4 gems in a line to create a persistent **line bomb**. Match or swap it to clear its entire row or column. Match 5 in a line to create a **colour bomb** that clears every gem of its colour when activated.
-5. Chain reactions and larger matches earn more points.
+5. Bombs caught in another explosion can chain-detonate, and each extra bomb in a chain adds a combo bonus. Larger matches and chain reactions earn more points.
 6. Reach **1,500 points in 25 moves** to complete the quest.
 7. Use **Hint**, **Pause**, **Restart**, and **Exit to home** when needed. On a keyboard, press **P** or **Space** to pause/resume, **H** for a hint, **R** to restart after confirmation, and **M** to toggle sound. When a gem tile is focused, use the **arrow keys** to move keyboard focus around the board. On touch screens, swipe a gem toward an adjacent gem to swap it.
 8. If the board runs out of valid moves, the game refreshes the board automatically.
