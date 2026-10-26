@@ -24,7 +24,7 @@ Once GitHub Pages is enabled, play at:
 7. Use **Hint**, **Pause**, **Restart**, and **Exit to home** when needed. On a keyboard, press **P** or **Space** to pause/resume, **H** for a hint, **R** to restart after confirmation, and **M** to toggle sound. When a gem tile is focused, use the **arrow keys** to move keyboard focus around the board. On touch screens, swipe a gem toward an adjacent gem to swap it.
 8. If the board runs out of valid moves, the game refreshes the board automatically.
 
-Sound effects are generated in the browser with the Web Audio API. Sound preference, your best score, daily best score, and daily streak are saved locally in your browser. The game supports tap/click and swipe controls, gives hints, and automatically reshuffles stuck boards.
+Sound effects are generated in the browser with the Web Audio API. The game automatically pauses when you switch away from its tab, and the end-of-round dialog clearly distinguishes reaching the target from running out of moves. Sound preference, your best score, daily best score, and daily streak are saved locally in your browser. The game supports tap/click and swipe controls, gives hints, and automatically reshuffles stuck boards.
 
 ## Files
 
