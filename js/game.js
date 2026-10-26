@@ -443,9 +443,14 @@
       });
       paused = true;
     } else if (moves <= 0) {
+      const targetReached = score >= currentTarget;
       showModal({
-        symbol: '◇', eyebrow: 'EVERY GEM COUNTS', title: 'Quest complete',
-        copy: 'You scored ' + score.toLocaleString() + ' points. ' + (score >= currentTarget ? 'Target reached!' : 'Reach ' + currentTarget.toLocaleString() + ' points next time to complete the quest.'),
+        symbol: targetReached ? '✧' : '◇',
+        eyebrow: targetReached ? 'QUEST COMPLETE' : 'KEEP THE SPARKLE ALIVE',
+        title: targetReached ? 'You did it!' : 'Out of moves',
+        copy: targetReached
+          ? 'You scored ' + score.toLocaleString() + ' points and reached your target!'
+          : 'You scored ' + score.toLocaleString() + ' of ' + currentTarget.toLocaleString() + ' points. You were ' + (currentTarget - score).toLocaleString() + ' points away. One more round?',
         actions: [
           { label: 'Try again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
@@ -602,6 +607,13 @@
       hideModal();
     }
   });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !gameScreen.classList.contains('hidden') && !paused && moves > 0) {
+      pauseGame();
+      showToast('Game paused while you were away');
+    }
+  });
+
   document.addEventListener('keydown', (event) => {
     const key = event.key.toLowerCase();
     const modalOpen = !modalBackdrop.classList.contains('hidden');
@@ -616,9 +628,10 @@
       hideModal();
       return;
     }
+    const target = event.target instanceof Element ? event.target : null;
     if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || modalOpen ||
-        gameScreen.classList.contains('hidden') || event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
-    const activeTile = event.target.closest('.tile');
+        gameScreen.classList.contains('hidden') || target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+    const activeTile = target?.closest('.tile');
     if (activeTile && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
       event.preventDefault();
       const row = Number(activeTile.dataset.row);
