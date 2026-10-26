@@ -11,7 +11,7 @@ Once GitHub Pages is enabled, play at:
 ## Game modes
 
 - **Crystal Quest:** reach 1,500 points in 25 moves.
-- **Daily Challenge:** a date-based target that changes each day, with 20 moves to beat it.
+- **Daily Challenge:** a date-based target that changes each day, with 20 moves to beat it. Win to build a daily streak on this browser.
 
 ## How to play
 
