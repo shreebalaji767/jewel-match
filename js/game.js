@@ -369,7 +369,7 @@
       copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Bigger matches and chain reactions score more. Reach 1,500 points before your 25 moves run out!',
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
-        { label: 'Maybe later', run: () => { hideModal(); } }
+        { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
       ]
     });
     if (!gameScreen.classList.contains('hidden')) paused = true;
@@ -382,7 +382,7 @@
       symbol: '↗', eyebrow: 'LEAVE THE CRYSTAL REALM?', title: 'Head home?',
       copy: 'This round will end if you leave. Want to keep playing instead?',
       actions: [
-        { label: 'Keep playing', run: hideModal },
+        { label: 'Keep playing', run: () => { paused = false; hideModal(); } },
         { label: 'Exit to home', run: goHome }
       ]
     });
@@ -394,7 +394,7 @@
       copy: 'Your current score and moves will reset. Ready for another go?',
       actions: [
         { label: 'Start fresh', run: startGame },
-        { label: 'Keep this round', run: hideModal }
+        { label: 'Keep this round', run: () => { paused = false; hideModal(); } }
       ]
     });
     paused = true;
