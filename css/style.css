@@ -1,4 +1,4 @@
-500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Self-contained styles: system fonts keep the game available offline. */
 
 :root{color-scheme:dark;--bg:#101020;--panel:#19192d;--muted:#999ab8;--text:#f7f4ff;--gold:#f8ce83;--pink:#f08bbd;--line:rgba(255,255,255,.1);font-family:'DM Sans',system-ui,sans-serif}
 *{box-sizing:border-box}
