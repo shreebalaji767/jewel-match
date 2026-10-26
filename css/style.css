@@ -213,3 +213,13 @@ img,svg,video,canvas{max-width:100%}
 .streak-stat::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:1px;background:var(--line)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 button:focus-visible,a:focus-visible{outline:3px solid #f8dba3;outline-offset:3px}
+
+
+/* Candy Crush-style special bombs */
+.tile.special-gem-tile{isolation:isolate}
+.tile .gem.special-gem{filter:brightness(1.16) drop-shadow(0 0 7px #fff8);animation:bombGlow 1.35s ease-in-out infinite alternate}
+.tile .gem.bomb-row,.tile .gem.bomb-column{outline:2px solid #fff9;outline-offset:-3px}
+.tile .gem.bomb-color{filter:brightness(1.3) drop-shadow(0 0 9px #ffe8a8);background:conic-gradient(#ff647c,#ffd76b,#69e8bd,#75b8ff,#c68cff,#ff647c)!important}
+.bomb-mark{position:absolute;z-index:2;display:grid;place-items:center;width:72%;height:72%;font-size:clamp(12px,2.6vw,25px);font-weight:900;line-height:1;color:#fff9;text-shadow:0 1px 4px #24133e,0 0 9px #fff;pointer-events:none}
+@keyframes bombGlow{from{filter:brightness(1.05) drop-shadow(0 0 3px #fff6)}to{filter:brightness(1.32) drop-shadow(0 0 10px #fff)}}
+@media(prefers-reduced-motion:reduce){.tile .gem.special-gem{animation:none}}
