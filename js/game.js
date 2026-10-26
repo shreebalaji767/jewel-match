@@ -27,7 +27,9 @@
   let toastTimer = null;
   let hintTimer = null;
   let gameRun = 0;
+  let pointerStart = null;
   let best = readBest();
+  try { soundOn = localStorage.getItem('jewel-match-sound') !== 'off'; } catch (_) {}
 
   function readBest() {
     try { return Number(localStorage.getItem('jewel-match-best')) || 0; }
@@ -146,7 +148,9 @@
     paused = false;
     board = createBoard();
     renderBoard();
-    message.textContent = 'Match 3 or more gems of the same kind.';
+    ensurePossibleMove();
+    $('#sound-toggle').textContent = soundOn ? '♫' : '♪';
+    message.textContent = 'Match 3 or more gems of the same kind. Swipe or tap to swap.';
     playTone(580, .1);
   }
 
@@ -174,6 +178,39 @@
         { label: 'Exit to home', run: goHome }
       ]
     });
+  }
+
+  function hasPossibleMove() {
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        const here = { row, col };
+        for (const next of [{ row, col: col + 1 }, { row: row + 1, col }]) {
+          if (next.row >= SIZE || next.col >= SIZE) continue;
+          swap(here, next);
+          const possible = findMatches().length > 0;
+          swap(here, next);
+          if (possible) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function ensurePossibleMove() {
+    if (hasPossibleMove()) return;
+    board = createBoard();
+    renderBoard();
+    showToast('Board refreshed — fresh moves await!');
+  }
+
+  function shuffleBoard() {
+    const gems = board.flat().sort(() => Math.random() - 0.5);
+    board = Array.from({ length: SIZE }, (_, row) => gems.slice(row * SIZE, (row + 1) * SIZE));
+    if (findMatches().length || !hasPossibleMove()) {
+      board = createBoard();
+      if (!hasPossibleMove()) return shuffleBoard();
+    }
+    renderBoard();
   }
 
   function coordinates(tile) {
@@ -276,6 +313,13 @@
     await clearMatches(runId);
     if (runId !== gameRun) return;
     busy = false;
+    if (score < TARGET && moves > 0 && !hasPossibleMove()) {
+      message.textContent = 'No moves left on the board — reshuffling your gems!';
+      await sleep(250);
+      if (runId !== gameRun) return;
+      shuffleBoard();
+      showToast('New board, same quest!');
+    }
     if (score >= TARGET) {
       showModal({
         symbol: '✧', eyebrow: 'CRYSTAL QUEST COMPLETE', title: 'You sparkle!',
@@ -325,6 +369,33 @@
     }
   });
 
+  let pointerHandled = false;
+  boardElement.addEventListener('pointerdown', (event) => {
+    const tile = event.target.closest('.tile');
+    if (!tile || event.pointerType === 'mouse' || busy || paused) return;
+    pointerStart = { ...coordinates(tile), x: event.clientX, y: event.clientY };
+    pointerHandled = false;
+  }, { passive: true });
+
+  boardElement.addEventListener('pointerup', (event) => {
+    if (!pointerStart || busy || paused) return;
+    const start = pointerStart;
+    pointerStart = null;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
+    const next = { row: start.row, col: start.col };
+    if (Math.abs(dx) > Math.abs(dy)) next.col += dx > 0 ? 1 : -1;
+    else next.row += dy > 0 ? 1 : -1;
+    if (next.row < 0 || next.row >= SIZE || next.col < 0 || next.col >= SIZE) return;
+    pointerHandled = true;
+    selected = null;
+    updateSelection();
+    trySwap(start, next);
+  }, { passive: true });
+
+  boardElement.addEventListener('pointercancel', () => { pointerStart = null; }, { passive: true });
+
   function updateSelection() {
     boardElement.querySelectorAll('.tile').forEach((tile) => {
       const row = Number(tile.dataset.row);
@@ -360,7 +431,8 @@
         }
       }
     }
-    showToast('No match found — try restarting!');
+    shuffleBoard();
+    showToast('Board refreshed — find a new match!');
   }
 
   function showHowToPlay() {
@@ -403,6 +475,7 @@
   $('#how-button').addEventListener('click', showHowToPlay);
   $('#sound-toggle').addEventListener('click', () => {
     soundOn = !soundOn;
+    try { localStorage.setItem('jewel-match-sound', soundOn ? 'on' : 'off'); } catch (_) {}
     $('#sound-toggle').textContent = soundOn ? '♫' : '♪';
     $('#sound-toggle').setAttribute('aria-label', soundOn ? 'Mute sound' : 'Enable sound');
     showToast(soundOn ? 'Sound enabled' : 'Sound muted');
