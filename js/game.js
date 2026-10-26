@@ -260,17 +260,56 @@
 
   async function clearMatches(runId, chain = 0) {
     if (runId !== gameRun) return;
-    const matches = findMatches();
+    let matches = findMatches();
     if (!matches.length) return;
+
+    // Four in a row creates a burst; five in a row clears that gem colour.
+    let longestRun = 0;
+    let prismType = board[matches[0][0]][matches[0][1]];
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        const gem = board[row][col];
+        if (!gem) continue;
+        let horizontal = 1;
+        while (col + horizontal < SIZE && board[row][col + horizontal] === gem) horizontal++;
+        let vertical = 1;
+        while (row + vertical < SIZE && board[row + vertical][col] === gem) vertical++;
+        longestRun = Math.max(longestRun, horizontal, vertical);
+        if (horizontal >= 5 || vertical >= 5) prismType = gem;
+      }
+    }
+
+    const cleared = new Set(matches.map(([row, col]) => row + ',' + col));
+    if (longestRun >= 5) {
+      for (let row = 0; row < SIZE; row++) {
+        for (let col = 0; col < SIZE; col++) {
+          if (board[row][col] === prismType) cleared.add(row + ',' + col);
+        }
+      }
+      message.textContent = 'PRISM BLAST! Every matching crystal is cleared!';
+      playTone(760, .22, 'triangle');
+    } else if (longestRun === 4) {
+      matches.forEach(([row, col]) => {
+        [[row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]].forEach(([r, c]) => {
+          if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) cleared.add(r + ',' + c);
+        });
+      });
+      message.textContent = 'CRYSTAL BURST! A four-gem match clears nearby gems!';
+      playTone(680, .16, 'triangle');
+    }
+    matches = [...cleared].map((key) => key.split(',').map(Number));
     const tiles = [...boardElement.querySelectorAll('.tile')];
     matches.forEach(([row, col]) => {
       const tile = tiles[row * SIZE + col];
       if (tile) tile.classList.add('matching');
     });
-    score += matches.length * 60 * (chain + 1);
+    const powerBonus = longestRun >= 5 ? 500 : longestRun === 4 ? 250 : 0;
+    score += matches.length * 60 * (chain + 1) + powerBonus;
     if (score > best) best = score;
     updateStats();
-    message.textContent = chain > 0 ? 'Combo x' + (chain + 1) + '! Beautiful chain reaction!' : (matches.length >= 5 ? 'Brilliant! A spectacular match!' : 'Lovely match! Keep it going.');
+    if (longestRun < 4) {
+      message.textContent = chain > 0 ? 'Combo x' + (chain + 1) + '! Beautiful chain reaction!' : 'Lovely match! Keep it going.';
+    }
     playTone(440 + Math.min(matches.length, 8) * 65, .13, 'triangle');
     await sleep(230);
     if (runId !== gameRun) return;
