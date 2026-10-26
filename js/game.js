@@ -3,8 +3,11 @@
 
   const SIZE = 8;
   const TYPES = ['ruby', 'sapphire', 'emerald', 'amethyst', 'topaz', 'diamond'];
-  const TARGET = 1500;
-  const START_MOVES = 25;
+  const CLASSIC_TARGET = 1500;
+  const CLASSIC_MOVES = 25;
+  let currentTarget = CLASSIC_TARGET;
+  let currentMoves = CLASSIC_MOVES;
+  let currentMode = 'classic';
   const $ = (selector) => document.querySelector(selector);
   const homeScreen = $('#home-screen');
   const gameScreen = $('#game-screen');
@@ -18,7 +21,7 @@
   const message = $('#game-message');
   let board = [];
   let score = 0;
-  let moves = START_MOVES;
+  let moves = CLASSIC_MOVES;
   let selected = null;
   let busy = false;
   let paused = false;
@@ -84,9 +87,9 @@
 
   function updateStats() {
     $('#score-value').textContent = score.toLocaleString();
-    $('#target-value').textContent = TARGET.toLocaleString();
+    $('#target-value').textContent = currentTarget.toLocaleString();
     $('#moves-value').textContent = moves;
-    $('#progress-fill').style.width = Math.min(100, score / TARGET * 100) + '%';
+    $('#progress-fill').style.width = Math.min(100, score / currentTarget * 100) + '%';
     saveBest();
   }
 
@@ -135,14 +138,25 @@
 
   function hideModal() { modalBackdrop.classList.add('hidden'); }
 
-  function startGame() {
+  function startGame(mode = currentMode) {
+    currentMode = mode;
+    if (currentMode === 'daily') {
+      const today = new Date();
+      const dayKey = today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate();
+      currentTarget = 1800 + (dayKey % 8) * 100;
+      currentMoves = 20;
+    } else {
+      currentTarget = CLASSIC_TARGET;
+      currentMoves = CLASSIC_MOVES;
+    }
+    $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : 'CRYSTAL QUEST';
     gameRun++;
     clearTimeout(hintTimer);
     homeScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
     hideModal();
     score = 0;
-    moves = START_MOVES;
+    moves = currentMoves;
     selected = null;
     busy = false;
     paused = false;
@@ -352,14 +366,14 @@
     await clearMatches(runId);
     if (runId !== gameRun) return;
     busy = false;
-    if (score < TARGET && moves > 0 && !hasPossibleMove()) {
+    if (score < currentTarget && moves > 0 && !hasPossibleMove()) {
       message.textContent = 'No moves left on the board — reshuffling your gems!';
       await sleep(250);
       if (runId !== gameRun) return;
       shuffleBoard();
       showToast('New board, same quest!');
     }
-    if (score >= TARGET) {
+    if (score >= currentTarget) {
       showModal({
         symbol: '✧', eyebrow: 'CRYSTAL QUEST COMPLETE', title: 'You sparkle!',
         copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Beautifully played!',
@@ -372,7 +386,7 @@
     } else if (moves <= 0) {
       showModal({
         symbol: '◇', eyebrow: 'EVERY GEM COUNTS', title: 'Quest complete',
-        copy: 'You scored ' + score.toLocaleString() + ' points. ' + (score >= TARGET ? 'Target reached!' : 'Reach ' + TARGET.toLocaleString() + ' points next time to complete the quest.'),
+        copy: 'You scored ' + score.toLocaleString() + ' points. ' + (score >= TARGET ? 'Target reached!' : 'Reach ' + currentTarget.toLocaleString() + ' points next time to complete the quest.'),
         actions: [
           { label: 'Try again', run: startGame },
           { label: 'Back to home', run: goHome }
@@ -488,7 +502,8 @@
     if (!gameScreen.classList.contains('hidden')) paused = true;
   }
 
-  $('#play-button').addEventListener('click', startGame);
+  $('#play-button').addEventListener('click', () => startGame('classic'));
+  $('#daily-button').addEventListener('click', () => startGame('daily'));
   $('#pause-button').addEventListener('click', pauseGame);
   $('#exit-button').addEventListener('click', () => {
     showModal({
