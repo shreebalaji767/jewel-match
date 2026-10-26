@@ -77,6 +77,10 @@
 
   function randomType() { return TYPES[Math.floor(Math.random() * TYPES.length)]; }
 
+  function gemType(gem) { return typeof gem === 'string' ? gem.split('|')[0] : ''; }
+  function gemPower(gem) { return typeof gem === 'string' && gem.includes('|') ? gem.split('|')[1] : ''; }
+  function isBomb(gem) { return Boolean(gemPower(gem)); }
+
   function createBoard() {
     const next = [];
     for (let row = 0; row < SIZE; row++) {
@@ -103,9 +107,18 @@
         tile.dataset.row = String(row);
         tile.dataset.col = String(col);
         tile.setAttribute('role', 'gridcell');
-        tile.setAttribute('aria-label', TYPES.includes(board[row][col]) ? board[row][col] + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
+        const type = gemType(board[row][col]);
+        const power = gemPower(board[row][col]);
+        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'colour bomb' : 'line bomb') : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
         const gem = document.createElement('span');
-        gem.className = 'gem ' + (board[row][col] || '');
+        gem.className = 'gem ' + type + (power ? ' special-gem bomb-' + power : '');
+        if (power) {
+          const mark = document.createElement('span');
+          mark.className = 'bomb-mark';
+          mark.textContent = power === 'color' ? '✹' : '✦';
+          mark.setAttribute('aria-hidden', 'true');
+          tile.appendChild(mark);
+        }
         gem.setAttribute('aria-hidden', 'true');
         tile.appendChild(gem);
         fragment.appendChild(tile);
@@ -295,9 +308,9 @@
     for (let row = 0; row < SIZE; row++) {
       let start = 0;
       while (start < SIZE) {
-        const gem = board[row][start];
+        const gem = gemType(board[row][start]);
         let end = start + 1;
-        while (gem && end < SIZE && board[row][end] === gem) end++;
+        while (gem && end < SIZE && gemType(board[row][end]) === gem) end++;
         if (gem && end - start >= 3) {
           for (let col = start; col < end; col++) matched.add(row + ',' + col);
         }
@@ -307,9 +320,9 @@
     for (let col = 0; col < SIZE; col++) {
       let start = 0;
       while (start < SIZE) {
-        const gem = board[start][col];
+        const gem = gemType(board[start][col]);
         let end = start + 1;
-        while (gem && end < SIZE && board[end][col] === gem) end++;
+        while (gem && end < SIZE && gemType(board[end][col]) === gem) end++;
         if (gem && end - start >= 3) {
           for (let row = start; row < end; row++) matched.add(row + ',' + col);
         }
@@ -321,70 +334,90 @@
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  async function clearMatches(runId, chain = 0) {
+  async function clearMatches(runId, chain = 0, forcedBombs = []) {
     if (runId !== gameRun) return;
-    let matches = findMatches();
-    if (!matches.length) return;
-
-    // Four in a row creates a burst; five in a row clears that gem colour.
-    let longestRun = 0;
-    let prismType = board[matches[0][0]][matches[0][1]];
-    for (let row = 0; row < SIZE; row++) {
-      for (let col = 0; col < SIZE; col++) {
-        const gem = board[row][col];
-        if (!gem) continue;
-        let horizontal = 1;
-        while (col + horizontal < SIZE && board[row][col + horizontal] === gem) horizontal++;
-        let vertical = 1;
-        while (row + vertical < SIZE && board[row + vertical][col] === gem) vertical++;
-        longestRun = Math.max(longestRun, horizontal, vertical);
-        if (horizontal >= 5 || vertical >= 5) prismType = gem;
-      }
-    }
+    const matches = findMatches();
+    if (!matches.length && !forcedBombs.length) return;
 
     const cleared = new Set(matches.map(([row, col]) => row + ',' + col));
-    if (longestRun >= 5) {
-      for (let row = 0; row < SIZE; row++) {
-        for (let col = 0; col < SIZE; col++) {
-          if (board[row][col] === prismType) cleared.add(row + ',' + col);
-        }
+    const matchSet = new Set(cleared);
+    const runs = [];
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        const type = gemType(board[row][col]);
+        if (!type) continue;
+        let horizontal = 1;
+        while (col + horizontal < SIZE && gemType(board[row][col + horizontal]) === type) horizontal++;
+        let vertical = 1;
+        while (row + vertical < SIZE && gemType(board[row + vertical][col]) === type) vertical++;
+        if (horizontal >= 4) runs.push({ length: horizontal, row, col, direction: 'row', type });
+        if (vertical >= 4) runs.push({ length: vertical, row, col, direction: 'column', type });
       }
-      message.textContent = 'PRISM BLAST! Every matching crystal is cleared!';
-      playTone(760, .22, 'triangle');
-    } else if (longestRun === 4) {
-      matches.forEach(([row, col]) => {
-        [[row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]].forEach(([r, c]) => {
-          if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) cleared.add(r + ',' + c);
-        });
-      });
-      message.textContent = 'CRYSTAL BURST! A four-gem match clears nearby gems!';
-      playTone(680, .16, 'triangle');
     }
-    matches = [...cleared].map((key) => key.split(',').map(Number));
-    const tiles = [...boardElement.querySelectorAll('.tile')];
+    runs.sort((a, b) => b.length - a.length);
+    let specialPosition = null;
+    if (runs.length) {
+      const run = runs[0];
+      const offset = Math.floor(run.length / 2);
+      specialPosition = run.direction === 'row'
+        ? { row: run.row, col: run.col + offset, power: run.length >= 5 ? 'color' : 'row', type: run.type }
+        : { row: run.row + offset, col: run.col, power: run.length >= 5 ? 'color' : 'column', type: run.type };
+    }
+
+    const bombsToTrigger = [...forcedBombs];
     matches.forEach(([row, col]) => {
-      const tile = tiles[row * SIZE + col];
+      if (isBomb(board[row][col])) bombsToTrigger.push({ row, col });
+    });
+    for (const bomb of bombsToTrigger) {
+      const gem = board[bomb.row]?.[bomb.col];
+      const power = gemPower(gem);
+      const type = gemType(gem);
+      if (power === 'color') {
+        for (let row = 0; row < SIZE; row++) {
+          for (let col = 0; col < SIZE; col++) {
+            if (gemType(board[row][col]) === type) cleared.add(row + ',' + col);
+          }
+        }
+        message.textContent = 'COLOR BOMB! Every gem of that colour explodes!';
+      } else if (power === 'row') {
+        for (let col = 0; col < SIZE; col++) cleared.add(bomb.row + ',' + col);
+        message.textContent = 'ROW BOMB! The whole row explodes!';
+      } else if (power === 'column') {
+        for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
+        message.textContent = 'COLUMN BOMB! The whole column explodes!';
+      }
+    }
+
+    if (specialPosition) {
+      cleared.delete(specialPosition.row + ',' + specialPosition.col);
+      board[specialPosition.row][specialPosition.col] = specialPosition.type + '|' + specialPosition.power;
+      showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : '✦ Line bomb created!');
+    }
+    const clearCoords = [...cleared].map((key) => key.split(',').map(Number));
+    clearCoords.forEach(([row, col]) => {
+      const tile = boardElement.querySelector('.tile[data-row="' + row + '"][data-col="' + col + '"]');
       if (tile) tile.classList.add('matching');
     });
-    const powerBonus = longestRun >= 5 ? 500 : longestRun === 4 ? 250 : 0;
-    score += matches.length * 60 * (chain + 1) + powerBonus;
+    const powerBonus = runs.some((run) => run.length >= 5) ? 500 : runs.length ? 250 : 0;
+    score += clearCoords.length * 60 * (chain + 1) + powerBonus;
     if (score > best) {
-      const isNewBest = score > best;
       best = score;
-      if (isNewBest && best > runBestAtStart && !personalBestCelebrated) {
+      if (best > runBestAtStart && !personalBestCelebrated) {
         personalBestCelebrated = true;
         showToast('New personal best!');
       }
     }
     saveDailyBest();
     updateStats();
-    if (longestRun < 4) {
+    if (!runs.length && !bombsToTrigger.length) {
       message.textContent = chain > 0 ? 'Combo x' + (chain + 1) + '! Beautiful chain reaction!' : 'Lovely match! Keep it going.';
     }
-    playTone(440 + Math.min(matches.length, 8) * 65, .13, 'triangle');
+    playTone(bombsToTrigger.length ? 780 : 440 + Math.min(clearCoords.length, 8) * 65, bombsToTrigger.length ? .22 : .13, 'triangle');
     await sleep(230);
     if (runId !== gameRun) return;
-    matches.forEach(([row, col]) => { board[row][col] = null; });
+    clearCoords.forEach(([row, col]) => {
+      if (!specialPosition || row !== specialPosition.row || col !== specialPosition.col) board[row][col] = null;
+    });
     for (let col = 0; col < SIZE; col++) {
       let write = SIZE - 1;
       for (let row = SIZE - 1; row >= 0; row--) {
@@ -407,8 +440,9 @@
     const runId = gameRun;
     swap(first, second);
     renderBoard();
-    let matches = findMatches();
-    if (!matches.length) {
+    const matches = findMatches();
+    const swappedBombs = [first, second].filter((point) => isBomb(board[point.row][point.col]));
+    if (!matches.length && !swappedBombs.length) {
       await sleep(150);
       if (runId !== gameRun) return;
       swap(first, second);
@@ -420,7 +454,7 @@
     }
     moves--;
     updateStats();
-    await clearMatches(runId);
+    await clearMatches(runId, 0, swappedBombs);
     if (runId !== gameRun) return;
     busy = false;
     if (score < currentTarget && moves > 0 && !hasPossibleMove()) {
