@@ -12,8 +12,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 .topbar{position:relative;z-index:2;height:78px;max-width:1240px;margin:auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.055)}
 .brand{display:flex;align-items:center;gap:11px;color:#f7f4ff;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px}
 .brand-light{color:#a5a2c4;font-weight:500;margin-left:2px}
-.brand-gem{display:grid;place-items:center;width:29px;height:29px;border-radius:9px;background:linear-gradient(145deg,#f8d990,#c18a43);color:#362342;font-size:20px;box-shadow:0 0 22px #e9b85a35}
-.top-actions{display:flex;gap:9px}
+.brand-logo{display:block;width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 12px #d9b2ff35);flex:none}
+.top-actions{display:flex;align-items:center;gap:9px;min-width:0}\n.install-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 13px;border:1px solid #f2d19a55;border-radius:12px;background:linear-gradient(110deg,#f8dba31c,#f2b7d51a);color:#f8dfb0;font-size:12px;font-weight:700;white-space:nowrap;transition:background .2s,border-color .2s,transform .2s}\n.install-button:hover{background:linear-gradient(110deg,#f8dba333,#f2b7d533);border-color:#f2d19a99;transform:translateY(-1px)}\n.install-button:disabled{opacity:.65;cursor:default;transform:none}\n.install-icon{font-size:17px;line-height:1}
 .icon-button{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:#ffffff08;color:#d8d4f2;font-size:18px;transition:.2s}
 .icon-button:hover{background:#ffffff14;border-color:#ffffff30;transform:translateY(-1px)}
 .app-shell{position:relative;z-index:1;max-width:1160px;min-height:calc(100vh - 78px);margin:auto;padding:24px 32px 20px}
@@ -125,3 +125,65 @@ h1 span,h2 span{background:linear-gradient(100deg,#ffe6a8 0%,#f3b5d8 55%,#c7b5ff
 .board-frame::before{content:"";position:absolute;inset:-1px;border-radius:18px;padding:1px;background:linear-gradient(135deg,#f7d8a64d,#c4a4ff18,#f2a9d54d);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 .primary-button:active,.secondary-button:active,.icon-button:active{transform:scale(.98)}
 @media(hover:none){.tile:hover .gem{filter:none;transform:none}}
+
+
+/* PWA install and all-device responsive refinements */
+html,body{width:100%;min-width:0}
+body{min-height:100dvh}
+.app-shell{width:100%;min-width:0}
+.home-screen,.game-screen,.hero-copy,.hero-art,.board-frame,.game-board{min-width:0;max-width:100%}
+.game-board{width:100%;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.tile{min-width:0;min-height:0}
+img,svg,video,canvas{max-width:100%}
+@media(max-width:480px){
+  .topbar{padding-left:12px;padding-right:12px;gap:8px}
+  .brand{gap:7px;font-size:11px;letter-spacing:1px}
+  .brand-logo{width:30px;height:30px}
+  .top-actions{gap:5px}
+  .install-button{min-height:35px;padding:0 9px;gap:5px;font-size:11px}
+  .icon-button{width:35px;height:35px;border-radius:10px}
+  .app-shell{padding-left:10px;padding-right:10px}
+  .game-screen{width:100%}
+  .score-card{padding:9px 7px}
+  .stat-label{font-size:8px;letter-spacing:1px}
+  .score-card strong{font-size:clamp(16px,5vw,21px)}
+  .board-frame{padding:3px;border-radius:12px}
+  .game-board{gap:2px;padding:3px}
+  .tile{padding:5%;border-radius:4px}
+  .game-tip{font-size:11px;margin:11px 0}
+  .game-controls{gap:5px}
+  .secondary-button{padding:8px 9px;font-size:11px}
+}
+@media(max-width:340px){
+  .brand-light{display:none}
+  .install-button{padding:0 7px}
+  .install-label{font-size:10px}
+  .top-actions{gap:4px}
+  .game-controls p{display:none}
+  .game-controls{justify-content:center;gap:12px}
+  .home-footer{font-size:7px}
+}
+@media(max-height:560px) and (orientation:landscape){
+  .topbar{height:52px}
+  .app-shell{min-height:calc(100dvh - 52px);padding-top:8px;padding-bottom:8px}
+  .home-screen{min-height:calc(100dvh - 70px);grid-template-columns:1fr 1fr;padding:8px 0 30px}
+  .hero-art{height:min(70vh,360px)}
+  h1{font-size:clamp(36px,6vh,56px);margin:10px 0}
+  .hero-description{font-size:12px;line-height:1.5;margin-bottom:12px}
+  .hero-stats{margin-bottom:14px}
+  .game-screen{max-width:min(94vw,760px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px;align-items:start}
+  .game-heading,.score-strip,.progress-track,.game-tip,.game-controls,.game-footer{grid-column:1}
+  .board-frame{grid-column:2;grid-row:1 / span 6;max-width:min(45vh,360px);justify-self:center;width:100%}
+  .game-heading{margin-bottom:8px}
+  .game-heading h2{font-size:23px}
+  .score-card{padding:7px}
+  .score-card strong{font-size:16px}
+  .game-tip{margin:8px 0}
+  .game-controls{margin-top:8px}
+  .game-footer{margin-top:10px}
+}
+@media(min-width:1100px){
+  .game-screen{max-width:640px}
+  .board-frame{padding:9px}
+  .game-board{gap:6px;padding:6px}
+}
