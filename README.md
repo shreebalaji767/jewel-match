@@ -24,7 +24,7 @@ Once GitHub Pages is enabled, play at:
 7. Use **Hint**, **Pause**, **Restart**, and **Exit to home** when needed. On touch screens, swipe a gem toward an adjacent gem to swap it.
 8. If the board runs out of valid moves, the game refreshes the board automatically.
 
-Sound effects are generated in the browser with the Web Audio API. Sound preference and your best score are saved locally in your browser. The game supports tap/click and swipe controls, gives hints, and automatically reshuffles stuck boards.
+Sound effects are generated in the browser with the Web Audio API. Sound preference, your best score, daily best score, and daily streak are saved locally in your browser. The game supports tap/click and swipe controls, gives hints, and automatically reshuffles stuck boards.
 
 ## Files
 
