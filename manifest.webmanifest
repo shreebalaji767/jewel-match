@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "Jewel Match — Crystal Quest",
+  "short_name": "Jewel Match",
+  "description": "A sparkling match-three crystal puzzle game.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#101020",
+  "theme_color": "#101020",
+  "categories": ["games", "puzzle", "entertainment"],
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
