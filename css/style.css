@@ -13,7 +13,11 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offse
 .brand{display:flex;align-items:center;gap:11px;color:#f7f4ff;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:2px}
 .brand-light{color:#a5a2c4;font-weight:500;margin-left:2px}
 .brand-logo{display:block;width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 12px #d9b2ff35);flex:none}
-.top-actions{display:flex;align-items:center;gap:9px;min-width:0}\n.install-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 13px;border:1px solid #f2d19a55;border-radius:12px;background:linear-gradient(110deg,#f8dba31c,#f2b7d51a);color:#f8dfb0;font-size:12px;font-weight:700;white-space:nowrap;transition:background .2s,border-color .2s,transform .2s}\n.install-button:hover{background:linear-gradient(110deg,#f8dba333,#f2b7d533);border-color:#f2d19a99;transform:translateY(-1px)}\n.install-button:disabled{opacity:.65;cursor:default;transform:none}\n.install-icon{font-size:17px;line-height:1}
+.top-actions{display:flex;align-items:center;gap:9px;min-width:0}
+.install-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 13px;border:1px solid #f2d19a55;border-radius:12px;background:linear-gradient(110deg,#f8dba31c,#f2b7d51a);color:#f8dfb0;font-size:12px;font-weight:700;white-space:nowrap;transition:background .2s,border-color .2s,transform .2s}
+.install-button:hover{background:linear-gradient(110deg,#f8dba333,#f2b7d533);border-color:#f2d19a99;transform:translateY(-1px)}
+.install-button:disabled{opacity:.65;cursor:default;transform:none}
+.install-icon{font-size:17px;line-height:1}
 .icon-button{width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:#ffffff08;color:#d8d4f2;font-size:18px;transition:.2s}
 .icon-button:hover{background:#ffffff14;border-color:#ffffff30;transform:translateY(-1px)}
 .app-shell{position:relative;z-index:1;max-width:1160px;min-height:calc(100vh - 78px);margin:auto;padding:24px 32px 20px}
