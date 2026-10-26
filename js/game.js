@@ -390,6 +390,7 @@
     else next.row += dy > 0 ? 1 : -1;
     if (next.row < 0 || next.row >= SIZE || next.col < 0 || next.col >= SIZE) return;
     pointerHandled = true;
+    setTimeout(() => { pointerHandled = false; }, 350);
     selected = null;
     updateSelection();
     trySwap(start, next);
