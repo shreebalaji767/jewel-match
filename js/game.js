@@ -496,5 +496,59 @@
     }
   });
 
+
+  let deferredInstallPrompt = null;
+  const installButton = $('#install-button');
+
+  function setInstallButton(label, disabled = false) {
+    const labelNode = installButton.querySelector('.install-label');
+    if (labelNode) labelNode.textContent = label;
+    installButton.disabled = disabled;
+    installButton.classList.toggle('install-unavailable', disabled);
+  }
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    setInstallButton('Install app');
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    setInstallButton('Installed', true);
+    showToast('Jewel Match installed successfully!');
+  });
+
+  installButton.addEventListener('click', async () => {
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      showToast('Jewel Match is already installed.');
+      return;
+    }
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const result = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      if (result && result.outcome === 'accepted') {
+        setInstallButton('Installing…', true);
+      } else {
+        setInstallButton('Install app');
+      }
+      return;
+    }
+    showModal({
+      symbol: '⇩', eyebrow: 'TAKE THE CRYSTAL QUEST WITH YOU', title: 'Install Jewel Match',
+      copy: 'Install availability depends on your browser and whether this site has finished loading over HTTPS. On supported browsers, use the install option in the browser menu. On iPhone or iPad, open the Share menu in Safari and choose “Add to Home Screen”.',
+      actions: [{ label: 'Got it', run: hideModal }]
+    });
+  });
+
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {
+        // The game remains playable if offline caching is unavailable.
+      });
+    });
+  }
+
   saveBest();
 })();
