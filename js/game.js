@@ -344,6 +344,7 @@
   }
 
   boardElement.addEventListener('click', (event) => {
+    if (pointerHandled) { pointerHandled = false; return; }
     const tile = event.target.closest('.tile');
     if (!tile || busy || paused || moves <= 0) return;
     const current = coordinates(tile);
