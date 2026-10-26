@@ -386,7 +386,7 @@
     } else if (moves <= 0) {
       showModal({
         symbol: '◇', eyebrow: 'EVERY GEM COUNTS', title: 'Quest complete',
-        copy: 'You scored ' + score.toLocaleString() + ' points. ' + (score >= TARGET ? 'Target reached!' : 'Reach ' + currentTarget.toLocaleString() + ' points next time to complete the quest.'),
+        copy: 'You scored ' + score.toLocaleString() + ' points. ' + (score >= currentTarget ? 'Target reached!' : 'Reach ' + currentTarget.toLocaleString() + ' points next time to complete the quest.'),
         actions: [
           { label: 'Try again', run: startGame },
           { label: 'Back to home', run: goHome }
