@@ -32,6 +32,7 @@
   let gameRun = 0;
   let pointerStart = null;
   let best = readBest();
+  let dailyStreak = readDailyStreak();
   try { soundOn = localStorage.getItem('jewel-match-sound') !== 'off'; } catch (_) {}
 
   function readBest() {
@@ -39,10 +40,16 @@
     catch (_) { return 0; }
   }
 
+  function readDailyStreak() {
+    try { return Number(localStorage.getItem('jewel-match-daily-streak')) || 0; } catch (_) { return 0; }
+  }
+
   function saveBest() {
     try { localStorage.setItem('jewel-match-best', String(best)); } catch (_) {}
     $('#best-home').textContent = 'BEST SCORE  ' + best.toLocaleString();
     $('#best-game').textContent = 'BEST  ' + best.toLocaleString();
+    const streakNode = $('#streak-home');
+    if (streakNode) streakNode.textContent = dailyStreak;
   }
 
   function randomType() { return TYPES[Math.floor(Math.random() * TYPES.length)]; }
@@ -137,6 +144,23 @@
   }
 
   function hideModal() { modalBackdrop.classList.add('hidden'); }
+
+  function recordDailyWin() {
+    if (currentMode !== 'daily') return;
+    const today = new Date();
+    const key = [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
+    try {
+      const previous = localStorage.getItem('jewel-match-daily-last-win');
+      if (previous === key) return;
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayKey = [yesterday.getFullYear(), String(yesterday.getMonth() + 1).padStart(2, '0'), String(yesterday.getDate()).padStart(2, '0')].join('-');
+      dailyStreak = previous === yesterdayKey ? dailyStreak + 1 : 1;
+      localStorage.setItem('jewel-match-daily-last-win', key);
+      localStorage.setItem('jewel-match-daily-streak', String(dailyStreak));
+    } catch (_) { dailyStreak++; }
+    saveBest();
+  }
 
   function startGame(mode = currentMode) {
     currentMode = mode;
@@ -374,9 +398,11 @@
       showToast('New board, same quest!');
     }
     if (score >= currentTarget) {
+      recordDailyWin();
       showModal({
-        symbol: '✧', eyebrow: 'CRYSTAL QUEST COMPLETE', title: 'You sparkle!',
-        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Beautifully played!',
+        eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : 'CRYSTAL QUEST COMPLETE',
+        symbol: '✧', title: 'You sparkle!',
+        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. ' + (currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
         actions: [
           { label: 'Play again', run: startGame },
           { label: 'Back to home', run: goHome }
