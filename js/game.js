@@ -404,7 +404,7 @@
         symbol: '✧', title: 'You sparkle!',
         copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. ' + (currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
         actions: [
-          { label: 'Play again', run: startGame },
+          { label: 'Play again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
         ]
       });
@@ -414,7 +414,7 @@
         symbol: '◇', eyebrow: 'EVERY GEM COUNTS', title: 'Quest complete',
         copy: 'You scored ' + score.toLocaleString() + ' points. ' + (score >= currentTarget ? 'Target reached!' : 'Reach ' + currentTarget.toLocaleString() + ' points next time to complete the quest.'),
         actions: [
-          { label: 'Try again', run: startGame },
+          { label: 'Try again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
         ]
       });
@@ -547,7 +547,7 @@
       symbol: '↻', eyebrow: 'A FRESH BEGINNING', title: 'Restart round?',
       copy: 'Your current score and moves will reset. Ready for another go?',
       actions: [
-        { label: 'Start fresh', run: startGame },
+        { label: 'Start fresh', run: () => startGame(currentMode) },
         { label: 'Keep this round', run: () => { paused = false; hideModal(); } }
       ]
     });
