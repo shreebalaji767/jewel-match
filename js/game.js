@@ -187,6 +187,8 @@
     $('#target-value').textContent = currentTarget.toLocaleString();
     $('#moves-value').textContent = moves;
     $('#progress-fill').style.width = Math.min(100, score / currentTarget * 100) + '%';
+    const objective = $('#objective-value');
+    if (objective) objective.textContent = currentMode === 'adventure' ? (levelGoal === 'ice' ? 'ICE ' + iceRemaining + ' left' : levelGoal === 'collect' ? 'CANDIES ' + Math.max(0, goalTarget - goalProgress) + ' left' : Math.max(0, currentTarget - score).toLocaleString() + ' to goal') : 'Reach ' + currentTarget.toLocaleString();
     saveBest();
   }
 
