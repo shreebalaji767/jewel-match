@@ -20,6 +20,7 @@
   const modalActions = $('#modal-actions');
   const message = $('#game-message');
   let board = [];
+  let ice = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
   let score = 0;
   let moves = CLASSIC_MOVES;
   let selected = null;
@@ -109,7 +110,7 @@
         tile.setAttribute('role', 'gridcell');
         const type = gemType(board[row][col]);
         const power = gemPower(board[row][col]);
-        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'colour bomb' : 'line bomb') : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
+        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : 'line bomb') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
         const gem = document.createElement('span');
         gem.className = 'gem ' + type + (power ? ' special-gem bomb-' + power : '');
         if (power) {
@@ -121,6 +122,13 @@
         }
         gem.setAttribute('aria-hidden', 'true');
         tile.appendChild(gem);
+        if (ice[row]?.[col]) {
+          const frost = document.createElement('span');
+          frost.className = 'ice-overlay';
+          frost.textContent = '❄';
+          frost.setAttribute('aria-hidden', 'true');
+          tile.appendChild(frost);
+        }
         fragment.appendChild(tile);
       }
     }
@@ -223,6 +231,15 @@
     busy = false;
     paused = false;
     board = createBoard();
+    ice = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
+    if (currentMode === 'adventure' && adventureLevel >= 3) {
+      const iceCount = Math.min(12, 2 + Math.floor(adventureLevel / 2));
+      let placed = 0, attempts = 0;
+      while (placed < iceCount && attempts++ < 100) {
+        const row = Math.floor(Math.random() * SIZE), col = Math.floor(Math.random() * SIZE);
+        if (!ice[row][col]) { ice[row][col] = true; placed++; }
+      }
+    }
     renderBoard();
     ensurePossibleMove();
     $('#sound-toggle').textContent = soundOn ? '♫' : '♪';
@@ -282,6 +299,7 @@
   function shuffleBoard() {
     const gems = board.flat().sort(() => Math.random() - 0.5);
     board = Array.from({ length: SIZE }, (_, row) => gems.slice(row * SIZE, (row + 1) * SIZE));
+    ice = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
     if (findMatches().length || !hasPossibleMove()) {
       board = createBoard();
       if (!hasPossibleMove()) return shuffleBoard();
@@ -438,17 +456,20 @@
     await sleep(triggeredBombs.size ? 1050 : 230);
     if (runId !== gameRun) return;
     clearCoords.forEach(([row, col]) => {
-      if (!specialPosition || row !== specialPosition.row || col !== specialPosition.col) board[row][col] = null;
+      if (specialPosition && row === specialPosition.row && col === specialPosition.col) { ice[row][col] = false; return; }
+      if (ice[row][col]) { ice[row][col] = false; return; }
+      board[row][col] = null;
     });
     for (let col = 0; col < SIZE; col++) {
       let write = SIZE - 1;
       for (let row = SIZE - 1; row >= 0; row--) {
         if (board[row][col] !== null) {
           board[write][col] = board[row][col];
+          ice[write][col] = ice[row][col];
           write--;
         }
       }
-      for (let row = write; row >= 0; row--) board[row][col] = randomType();
+      for (let row = write; row >= 0; row--) { board[row][col] = randomType(); ice[row][col] = false; }
     }
     renderBoard();
     await sleep(100);
