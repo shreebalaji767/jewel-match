@@ -88,9 +88,9 @@ The game uses relative asset paths so it can run from the repository's GitHub Pa
 
 ## Upgrade pack
 
-- **Super combo scoring:** cascades use a visible multiplier up to ×5, with bonus points for special-candy and multi-bomb combinations.
+- **Super combo scoring:** cascades use a multiplier up to ×5. Two colour bombs clear the whole board; a colour bomb paired with another special candy targets that candy's colour; other special combinations merge their blasts.
 - **Treasure chests:** every fifth victory and every 10th Sugar Trail milestone grants a free coin chest. Unused moves award bonus points and coins on victory.
-- **Ten themed Sugar Trail worlds:** themed regions and milestone boss challenges at levels 10, 20, 30 … 100.
+- **Ten themed Sugar Trail worlds:** themed regions and real boss levels at 10, 20, 30 … 100. Boss levels require clearing frozen tiles, feature a crown celebration, and award a 100-coin chest.
 - **Achievement collection book:** earn rewards for victories, cascades, daily streaks, progress across 10 levels, and three-star clears. Achievements are saved locally.
 - **Accessibility settings:** reduce animation effects or enable gem shape markers for colour-independent play.
 - **Save backup tools:** export progress as a JSON file or import a previous backup by pasting its contents. Import replaces matching local progress keys on this browser; export a backup first.
