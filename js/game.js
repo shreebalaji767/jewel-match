@@ -664,6 +664,7 @@
     await clearMatches(runId, 0, swappedBombs);
     if (runId !== gameRun) return;
     busy = false;
+    updateUndoButton();
     if (score < currentTarget && moves > 0 && !hasPossibleMove()) {
       message.textContent = 'No moves left on the board — reshuffling your gems!';
       await sleep(250);
