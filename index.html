@@ -46,20 +46,14 @@
         <div class="hero-actions"><button class="primary-button" id="play-button" type="button"><span>Play now</span><span class="button-arrow">↗</span></button><button class="daily-button" id="daily-button" type="button"><span class="daily-icon">✦</span><span><strong>Daily challenge</strong><small>A new goal every day</small></span><span class="daily-arrow">→</span></button><button class="daily-button adventure-button" id="adventure-button" type="button"><span class="daily-icon">🍭</span><span><strong>Sugar Trail</strong><small>Continue at level <b id="level-home">1</b></small></span><span class="daily-arrow">→</span></button><button class="daily-button level-map-button" id="level-map-button" type="button"><span class="daily-icon">🗺</span><span><strong>Level Map</strong><small>Replay completed levels</small></span><span class="daily-arrow">→</span></button></div>
         <div class="progress-rewards" aria-label="Player progress"><span>💎 <strong id="coins-home">0</strong> coins</span><span>🏆 <strong id="wins-home">0</strong> wins</span><span>⚡ Best chain <strong id="chain-home">0</strong></span></div>
         <button class="daily-gift-button" id="daily-gift-button" type="button" aria-describedby="daily-gift-copy"><span class="daily-gift-icon" aria-hidden="true">🎁</span><span class="daily-gift-copy"><strong id="daily-gift-title">Daily crystal gift</strong><small id="daily-gift-copy">Claim 50 free coins today</small></span><span class="daily-gift-status" id="daily-gift-status" aria-hidden="true">＋</span></button>
-        <div class="home-toolbox" aria-label="Progress and settings"><button class="secondary-button" id="achievements-button" type="button">🏆 <span>Achievements</span></button><button class="secondary-button" id="save-tools-button" type="button">💾 <span>Save backup</span></button><button class="secondary-button" id="settings-button" type="button">⚙ <span>Settings</span></button></div>
+        <div class="home-toolbox" aria-label="Progress and settings"><button class="secondary-button" id="achievements-button" type="button">🏆 <span>Achievements</span></button><button class="secondary-button" id="save-tools-button" type="button">💾 <span>Save backup</span></button><button class="secondary-button" id="settings-button" type="button">⚙ <span>Settings</span></button><button class="secondary-button" id="difficulty-button" type="button">🎚 Difficulty: Normal</button></div>
         <p class="microcopy free-promise">100% FREE <span>•</span> NO ADS <span>•</span> NO PURCHASES <span>•</span> ALL LEVELS UNLOCKED</p>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-        <div class="hero-glow"></div>
-        <div class="showcase-gem gem ruby showcase-ruby"></div>
-        <div class="showcase-gem gem sapphire showcase-sapphire"></div>
-        <div class="showcase-gem gem emerald showcase-emerald"></div>
-        <div class="showcase-gem gem amethyst showcase-amethyst"></div>
-        <div class="showcase-gem gem topaz showcase-topaz"></div>
-        <div class="showcase-gem gem diamond showcase-diamond"></div>
-        <div class="spark spark-a">✦</div><div class="spark spark-b">✧</div><div class="spark spark-c">✦</div>
-        <div class="art-caption"><span class="caption-line"></span><span>THE SUGAR TRAIL</span><span class="caption-line"></span></div>
+      <div class="hero-art gameplay-preview">
+        <video class="gameplay-video" autoplay muted loop playsinline preload="metadata" aria-label="Original Jewel Match gameplay demo">
+          <source src="./media/jewel-match-gameplay.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay" aria-hidden="true"><span>ORIGINAL GAMEPLAY DEMO</span><strong>Infinite Sugar Trail</strong><small>Combos · Treasure chests · Boss levels</small></div>
       </div>
       <div class="home-footer"><span>✧ TAKE A BREATH. MAKE A MATCH. ✧</span><span id="best-home">BEST SCORE&nbsp; 0</span><span id="daily-best-home">TODAY&nbsp; 0</span></div>
     </section>
