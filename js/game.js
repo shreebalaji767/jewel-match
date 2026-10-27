@@ -831,7 +831,7 @@
         celebration: true,
         copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins including +' + (moves*5) + ' for unused moves' + (chestBonus?' and a treasure chest bonus of '+chestBonus+' coins':'') + '. ' + (bossLevel ? 'Boss chest claimed! ' : '') + (currentMode === 'adventure' ? 'Stars earned: ' + '★'.repeat(Number(levelStars[currentLevel]) || 1) + '☆'.repeat(3 - (Number(levelStars[currentLevel]) || 1)) + '. Next up: Level ' + adventureLevel + '. ' : currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
         actions: [
-          { label: currentMode === 'adventure' ? 'Next level' : 'Play again', run: () => startGame(currentMode) },
+          { label: currentMode === 'adventure' ? 'Next Level → ' + (currentLevel + 1) : 'Play again', run: () => currentMode === 'adventure' ? startGame('adventure', currentLevel + 1) : startGame(currentMode) },
           { label: 'Back to home', run: goHome }
         ]
       });
