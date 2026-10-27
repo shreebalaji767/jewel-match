@@ -354,13 +354,21 @@
   }
 
   function shuffleBoard() {
-    const gems = board.flat().sort(() => Math.random() - 0.5);
-    board = Array.from({ length: SIZE }, (_, row) => gems.slice(row * SIZE, (row + 1) * SIZE));
-    ice = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
-    if (findMatches().length || !hasPossibleMove()) {
-      board = createBoard();
-      if (!hasPossibleMove()) return shuffleBoard();
+    // Shuffle candies, never objectives: frozen tiles stay frozen in their original cells.
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const gems = board.flat();
+      for (let i = gems.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [gems[i], gems[j]] = [gems[j], gems[i]];
+      }
+      board = Array.from({ length: SIZE }, (_, row) => gems.slice(row * SIZE, (row + 1) * SIZE));
+      if (!findMatches().length && hasPossibleMove()) {
+        renderBoard();
+        return;
+      }
     }
+    // Bounded fallback prevents a recursive shuffle loop on unusual boards.
+    board = createBoard();
     renderBoard();
   }
 
@@ -803,6 +811,16 @@
     paused = true;
   });
   $('#hint-button').addEventListener('click', hint);
+  $('#shuffle-button').addEventListener('click', () => {
+    if (busy || paused || moves <= 0) return;
+    selected = null;
+    clearTimeout(hintTimer);
+    boardElement.querySelectorAll('.hint-tile').forEach((tile) => tile.classList.remove('hint-tile'));
+    shuffleBoard();
+    message.textContent = 'Fresh board! Your moves and frozen objectives are unchanged.';
+    showToast('Free shuffle — no move used!');
+    playTone(620, .12, 'triangle');
+  });
   $('#how-button').addEventListener('click', showHowToPlay);
   $('#sound-toggle').addEventListener('click', () => {
     soundOn = !soundOn;
@@ -875,6 +893,8 @@
       }
     } else if (key === 'h') {
       hint();
+    } else if (key === 's') {
+      $('#shuffle-button').click();
     } else if (key === 'r') {
       showModal({
         symbol: '↻', eyebrow: 'A FRESH BEGINNING', title: 'Restart round?',
