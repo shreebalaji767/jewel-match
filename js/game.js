@@ -895,6 +895,8 @@
       hint();
     } else if (key === 's') {
       $('#shuffle-button').click();
+    } else if (key === 's') {
+      $('#shuffle-button').click();
     } else if (key === 'r') {
       showModal({
         symbol: '↻', eyebrow: 'A FRESH BEGINNING', title: 'Restart round?',
