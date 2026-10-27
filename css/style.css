@@ -247,3 +247,18 @@ button:focus-visible,a:focus-visible{outline:3px solid #f8dba3;outline-offset:3p
   100%{opacity:0;transform:scale(.1)}
 }
 @media(prefers-reduced-motion:reduce){.tile.bomb-slowmo,.tile.bomb-slowmo .gem,.tile.bomb-slowmo .bomb-mark{animation-duration:.01ms!important}}
+
+
+/* Adventure progression, rewards, obstacles and combo polish */
+.adventure-button{border-color:#f6d39b35;background:linear-gradient(125deg,#f6d39b12,#86e6d312)}
+.adventure-button .daily-icon{color:#f6d39b;background:#f6d39b18}
+.progress-rewards{display:flex;gap:16px;flex-wrap:wrap;margin-top:18px;color:var(--muted);font-size:11px}
+.progress-rewards span{padding:8px 10px;border:1px solid #ffffff12;border-radius:9px;background:#ffffff05}
+.progress-rewards strong{color:#f4d59a}
+.ice-overlay{position:absolute;inset:4%;z-index:3;display:grid;place-items:center;border:1px solid #c7f4ff9c;border-radius:7px;background:linear-gradient(135deg,#d7f7ff5c,#7ccffb25);color:#e4fbff;text-shadow:0 1px 5px #356b9b;font-size:clamp(13px,2.4vw,24px);box-shadow:inset 0 0 8px #fff7;pointer-events:none}
+.tile .gem.bomb-color{animation:rainbowPulse .8s ease-in-out infinite alternate}
+@keyframes rainbowPulse{from{filter:brightness(1.05) drop-shadow(0 0 5px #fff8)}to{filter:brightness(1.55) drop-shadow(0 0 14px #ffe8a8)}}
+.tile.matching::after{content:"✦";position:absolute;z-index:4;top:2px;right:4px;color:#fff;font-size:clamp(10px,1.8vw,17px);font-weight:900;text-shadow:0 1px 5px #151020;animation:scoreSpark .45s ease-out forwards;pointer-events:none}
+@keyframes scoreSpark{from{opacity:0;transform:translateY(5px) scale(.7)}35%{opacity:1}to{opacity:0;transform:translateY(-12px) scale(1.2)}}
+@media(max-width:760px){.progress-rewards{justify-content:center;gap:7px}.progress-rewards span{font-size:10px;padding:7px}}
+@media(prefers-reduced-motion:reduce){.tile .gem.bomb-color{animation:none}.tile.matching::after{animation:none}}
