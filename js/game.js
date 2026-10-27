@@ -62,12 +62,12 @@
 
   function showLevelMap() {
     const actions = [];
-    for (let level = 1; level <= Math.min(Math.max(1, adventureLevel), 20); level++) {
+    for (let level = 1; level <= 100; level++) {
       const stars = Number(levelStars[level]) || 0;
       actions.push({ label: 'Level ' + level + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '· · ·'), run: () => startGame('adventure', level) });
     }
     actions.push({ label: 'Close map', run: hideModal });
-    showModal({ symbol: '🍬', eyebrow: 'SUGAR TRAIL', title: 'Choose a level', copy: 'Complete each level to unlock the next stop. Earn up to three stars for a high-score finish.', actions });
+    showModal({ symbol: '🍬', eyebrow: 'SUGAR TRAIL', title: 'Choose a level', copy: 'All 100 levels are free to play. Pick any level, retry without limits, and earn up to three stars. No ads, purchases, or paywalls.', actions });
   }
 
   function persistProgress() {
@@ -256,7 +256,7 @@
 
   function startGame(mode = currentMode, requestedLevel = null) {
     currentMode = mode;
-    if (mode === 'adventure' && Number.isInteger(requestedLevel) && requestedLevel > 0) currentLevel = Math.min(requestedLevel, Math.max(1, adventureLevel));
+    if (mode === 'adventure' && Number.isInteger(requestedLevel) && requestedLevel > 0) currentLevel = Math.min(100, Math.max(1, requestedLevel));
     else if (mode === 'adventure') currentLevel = adventureLevel;
     if (currentMode === 'daily') {
       const today = new Date();
@@ -594,7 +594,7 @@
     if (score >= currentTarget && objectiveComplete) {
       recordDailyWin();
       gamesWon++;
-      const reward = currentMode === 'daily' ? 75 : currentMode === 'adventure' ? 40 + adventureLevel * 5 : 20;
+      const reward = currentMode === 'daily' ? 75 : currentMode === 'adventure' ? 40 + currentLevel * 5 : 20;
       crystalCoins += reward;
       if (currentMode === 'adventure') {
         const stars = score >= currentTarget * 1.8 ? 3 : score >= currentTarget * 1.35 ? 2 : 1;
