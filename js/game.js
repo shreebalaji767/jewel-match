@@ -700,8 +700,6 @@
         ]
       });
       paused = true;
-    updateUndoButton();
-      updateUndoButton();
       updateUndoButton();
     } else if (moves <= 0) {
       const targetReached = score >= currentTarget && objectiveComplete;
@@ -718,7 +716,6 @@
         ]
       });
       paused = true;
-    updateUndoButton();
       updateUndoButton();
     }
   }
@@ -957,7 +954,6 @@
         ]
       });
       paused = true;
-    updateUndoButton();
       updateUndoButton();
     }
   });
