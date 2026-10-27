@@ -99,3 +99,7 @@ The game uses relative asset paths so it can run from the repository's GitHub Pa
 - **Accessibility settings:** reduce animation effects or enable gem shape markers for colour-independent play.
 - **Save backup tools:** export progress as a JSON file or import a previous backup by pasting its contents. Import replaces matching local progress keys on this browser; export a backup first.
 - **Free forever:** all rewards are earned through play. No paid chests, ads, subscriptions, or database are added.
+## Landing-page gameplay preview
+
+- The landing page displays a looping **3840 × 2160 (4K) MP4** gameplay-style preview and scales it responsively for desktop, tablet, and mobile screens.
+- The current 4K file is upscaled from the original demo animation; it is not native-resolution browser screen-recording footage.
