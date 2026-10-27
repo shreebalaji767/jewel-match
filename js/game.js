@@ -352,6 +352,7 @@
   function pauseGame() {
     if (busy || gameScreen.classList.contains('hidden')) return;
     paused = true;
+    updateUndoButton();
     showModal({
       symbol: 'Ⅱ', eyebrow: 'TAKE YOUR TIME', title: 'Paused',
       copy: 'Your crystal quest is on hold. Ready when you are.',
@@ -699,6 +700,8 @@
         ]
       });
       paused = true;
+    updateUndoButton();
+      updateUndoButton();
       updateUndoButton();
     } else if (moves <= 0) {
       const targetReached = score >= currentTarget && objectiveComplete;
@@ -715,6 +718,8 @@
         ]
       });
       paused = true;
+    updateUndoButton();
+      updateUndoButton();
     }
   }
 
@@ -840,6 +845,7 @@
       ]
     });
     paused = true;
+    updateUndoButton();
   });
   $('#restart-button').addEventListener('click', () => {
     showModal({
@@ -851,6 +857,7 @@
       ]
     });
     paused = true;
+    updateUndoButton();
   });
   $('#hint-button').addEventListener('click', hint);
   $('#undo-button').addEventListener('click', undoLastMove);
@@ -950,6 +957,8 @@
         ]
       });
       paused = true;
+    updateUndoButton();
+      updateUndoButton();
     }
   });
 
