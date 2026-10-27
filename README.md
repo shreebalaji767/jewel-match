@@ -15,7 +15,7 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
 
 - **Crystal Quest:** score at least 1,500 points in 25 moves.
 - **Daily Challenge:** a date-based target with 20 moves. Wins can build your daily streak on the current browser.
-- **Infinite Sugar Trail:** endless numbered levels, repeating themed worlds, rising score targets, move limits, collectible-candy and frozen-tile objectives, boss levels every 10 levels, and up to three stars per level. Choose any level number.
+- **Infinite Sugar Trail:** endless numbered levels, repeating themed worlds, rising score targets, move limits, collectible-candy and frozen-tile objectives, boss levels every 10 levels, and up to three stars per level. After each win, use the **Next Level → N** button to advance directly to the next level. Choose any level number from the level map.
 - **Crystal Coins & Records:** earn coins from victories and gift boxes, plus claim a **free 50-coin daily gift** once per local calendar day. Wins, coins, best chain, level stars, best scores, and progress are saved locally in your browser.
 
 ## How to play
