@@ -617,14 +617,14 @@
       });
       paused = true;
     } else if (moves <= 0) {
-      const targetReached = score >= currentTarget;
+      const targetReached = score >= currentTarget && objectiveComplete;
       showModal({
         symbol: targetReached ? '✧' : '◇',
         eyebrow: targetReached ? 'QUEST COMPLETE' : 'KEEP THE SPARKLE ALIVE',
         title: targetReached ? 'You did it!' : 'Out of moves',
         copy: targetReached
           ? 'You scored ' + score.toLocaleString() + ' points and reached your target!'
-          : 'You scored ' + score.toLocaleString() + ' of ' + currentTarget.toLocaleString() + ' points. You were ' + (currentTarget - score).toLocaleString() + ' points away. One more round?',
+          : 'You scored ' + score.toLocaleString() + ' points. ' + (score < currentTarget ? 'You were ' + (currentTarget - score).toLocaleString() + ' points away. ' : currentMode === 'adventure' && levelGoal === 'ice' ? iceRemaining + ' frozen tiles remain. ' : currentMode === 'adventure' && levelGoal === 'collect' ? Math.max(0, goalTarget - goalProgress) + ' candies still to collect. ' : '') + 'Try again?',
         actions: [
           { label: 'Try again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
