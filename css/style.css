@@ -301,3 +301,7 @@ body{background:radial-gradient(ellipse at 50% 8%,#6b2ca2 0,#35145d 45%,#1d103a 
 .tile.bomb-slowmo .gem{filter:brightness(1.3) saturate(1.3) drop-shadow(0 0 8px #fff)!important}
 @media(max-width:760px){.board-frame{padding:5px;border-radius:16px}.game-board{gap:3px;padding:4px}.tile{border-radius:8px}.objective-pill{margin:7px auto 9px}}
 @media(prefers-reduced-motion:reduce){.tile.matching .gem{animation:none}}
+
+
+/* Permanent free-to-play promise */
+.free-promise{color:#fff0a1!important;font-weight:900;letter-spacing:.055em;text-wrap:balance}.free-promise span{color:#ff91cb;padding:0 3px}.level-map-button{border-color:#ffe68d75}
