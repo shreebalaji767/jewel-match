@@ -329,3 +329,18 @@ button:disabled{cursor:not-allowed;opacity:.65}
 #undo-button:not(:disabled):hover{border-color:#a8f0dfbb;background:linear-gradient(125deg,#7ef5d344,#a8f0df25)}
 #undo-button:disabled{filter:saturate(.45);opacity:.48}
 @media(max-width:520px){.quick-tools #undo-button{flex:1;min-width:0;justify-content:center}}
+
+
+/* Free daily crystal gift */
+.daily-gift-button{display:flex;align-items:center;gap:11px;width:100%;max-width:390px;margin:16px 0 0;padding:11px 13px;border:1px solid #f8ce8355;border-radius:14px;background:linear-gradient(110deg,#f8ce8318,#f08bbd12);color:var(--text);text-align:left;transition:transform .2s,border-color .2s,background .2s}
+.daily-gift-button:not(:disabled):hover{transform:translateY(-2px);border-color:#f8ce83aa;background:linear-gradient(110deg,#f8ce8328,#f08bbd22)}
+.daily-gift-button:disabled{cursor:default}
+.daily-gift-icon{display:grid;place-items:center;width:38px;height:38px;flex:none;border-radius:11px;background:#f8ce831c;font-size:22px}
+.daily-gift-copy{display:block;min-width:0}
+.daily-gift-copy strong,.daily-gift-copy small{display:block}
+.daily-gift-copy strong{font-size:12px}
+.daily-gift-copy small{margin-top:4px;color:var(--muted);font-size:10px}
+.daily-gift-status{margin-left:auto;color:#f8ce83;font-size:20px;font-weight:700}
+.daily-gift-button.claimed{border-color:#a8f0df33;background:#a8f0df0c}
+.daily-gift-button.claimed .daily-gift-icon,.daily-gift-button.claimed .daily-gift-status{color:#a8f0df}
+@media(max-width:520px){.daily-gift-button{max-width:none;margin-top:12px}}
