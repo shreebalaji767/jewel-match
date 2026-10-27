@@ -42,6 +42,7 @@
   let hintTimer = null;
   let gameRun = 0;
   let pointerStart = null;
+  let undoSnapshot = null;
   let best = readBest();
   let runBestAtStart = best;
   let personalBestCelebrated = false;
@@ -182,6 +183,35 @@
     updateStats();
   }
 
+  function updateUndoButton() {
+    const button = $('#undo-button');
+    if (button) button.disabled = !undoSnapshot || busy;
+  }
+
+  function undoLastMove() {
+    if (!undoSnapshot || busy) return;
+    const snapshot = undoSnapshot;
+    undoSnapshot = null;
+    board = snapshot.board.map((row) => row.slice());
+    ice = snapshot.ice.map((row) => row.slice());
+    score = snapshot.score;
+    moves = snapshot.moves;
+    goalProgress = snapshot.goalProgress;
+    iceRemaining = snapshot.iceRemaining;
+    crystalCoins = snapshot.crystalCoins;
+    bestChain = snapshot.bestChain;
+    selected = null;
+    paused = false;
+    hideModal();
+    renderBoard();
+    updateStats();
+    persistProgress();
+    updateUndoButton();
+    message.textContent = 'Last move undone. Your score, moves, candies, and frozen tiles are restored.';
+    showToast('↶ Move undone — try a different match!');
+    playTone(300, .1, 'sine');
+  }
+
   function updateStats() {
     $('#score-value').textContent = score.toLocaleString();
     $('#target-value').textContent = currentTarget.toLocaleString();
@@ -284,6 +314,8 @@
     score = 0;
     moves = currentMoves;
     selected = null;
+    undoSnapshot = null;
+    updateUndoButton();
     busy = false;
     paused = false;
     board = createBoard();
@@ -603,6 +635,11 @@
     busy = true;
     selected = null;
     const runId = gameRun;
+    const moveSnapshot = {
+      board: board.map((row) => row.slice()),
+      ice: ice.map((row) => row.slice()),
+      score, moves, goalProgress, iceRemaining, crystalCoins, bestChain
+    };
     swap(first, second);
     renderBoard();
     const matches = findMatches();
@@ -620,7 +657,9 @@
       busy = false;
       return;
     }
+    undoSnapshot = moveSnapshot;
     moves--;
+    updateUndoButton();
     updateStats();
     await clearMatches(runId, 0, swappedBombs);
     if (runId !== gameRun) return;
@@ -811,6 +850,7 @@
     paused = true;
   });
   $('#hint-button').addEventListener('click', hint);
+  $('#undo-button').addEventListener('click', undoLastMove);
   $('#shuffle-button').addEventListener('click', () => {
     if (busy || paused || moves <= 0) return;
     selected = null;
@@ -895,8 +935,8 @@
       hint();
     } else if (key === 's') {
       $('#shuffle-button').click();
-    } else if (key === 's') {
-      $('#shuffle-button').click();
+    } else if (key === 'u') {
+      undoLastMove();
     } else if (key === 'r') {
       showModal({
         symbol: '↻', eyebrow: 'A FRESH BEGINNING', title: 'Restart round?',
