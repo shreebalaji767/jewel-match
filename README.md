@@ -57,7 +57,8 @@ Undo is available during an active round after a valid move resolves; it is disa
 
 ## Features
 
-- Responsive desktop, tablet, and mobile layouts.
+- Viewport-aware responsive layout for desktop, tablets, phones, portrait and landscape orientation, and short-height screens; the board scales to available width/height without horizontal page overflow.
+- Touch-friendly controls and scrollable dialogs for small screens.
 - Glossy candy-style gems, animated special candies, cascading matches, chain explosions, and slow-motion bomb effects.
 - Installable Progressive Web App (PWA), with service-worker caching for offline play after the first successful load.
 - Locally saved progress, level stars, coins, wins, records, sound preference, daily challenge streak, and daily-gift claim date.
