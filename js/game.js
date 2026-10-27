@@ -404,6 +404,20 @@
         start = end;
       }
     }
+    // A same-colour 2×2 square is a box match and counts as a special-candy match.
+    for (let row = 0; row < SIZE - 1; row++) {
+      for (let col = 0; col < SIZE - 1; col++) {
+        const type = gemType(board[row][col]);
+        if (type && gemType(board[row][col + 1]) === type &&
+            gemType(board[row + 1][col]) === type &&
+            gemType(board[row + 1][col + 1]) === type) {
+          matched.add(row + ',' + col);
+          matched.add(row + ',' + (col + 1));
+          matched.add((row + 1) + ',' + col);
+          matched.add((row + 1) + ',' + (col + 1));
+        }
+      }
+    }
     return [...matched].map((key) => key.split(',').map(Number));
   }
 
@@ -439,6 +453,20 @@
       for (let r = row - 1; r >= 0 && gemType(board[r][col]) === type; r--) vertical++;
       for (let r = row + 1; r < SIZE && gemType(board[r][col]) === type; r++) vertical++;
       if (horizontal >= 3 && vertical >= 3) { specialPosition = { row, col, power: 'wrapped', type }; break; }
+    }
+    // A 2×2 candy box creates a gift candy even though it has no straight run.
+    if (!specialPosition) {
+      for (let row = 0; row < SIZE - 1 && !specialPosition; row++) {
+        for (let col = 0; col < SIZE - 1; col++) {
+          const type = gemType(board[row][col]);
+          if (type && gemType(board[row][col + 1]) === type &&
+              gemType(board[row + 1][col]) === type &&
+              gemType(board[row + 1][col + 1]) === type) {
+            specialPosition = { row: row + 1, col: col + 1, power: 'gift', type };
+            break;
+          }
+        }
+      }
     }
     if (!specialPosition && runs.length) {
       const run = runs[0];
