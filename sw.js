@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'jewel-match-v16';
+const CACHE_NAME = 'jewel-match-v17';
 const APP_SHELL = [
   './',
   './index.html',
