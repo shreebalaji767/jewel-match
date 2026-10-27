@@ -80,6 +80,7 @@
     const keys=['jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist'];
     const data={app:'Jewel Match',format:1,exportedAt:new Date().toISOString(),progress:{}};
     keys.forEach((key)=>{try{const v=localStorage.getItem(key);if(v!==null)data.progress[key]=v;}catch(_){}});
+    try { for (let i=0;i<localStorage.length;i++) { const key=localStorage.key(i); if (key && key.startsWith('jewel-match-daily-best-')) data.progress[key]=localStorage.getItem(key); } } catch (_) {}
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})), link=document.createElement('a');
     link.href=url;link.download='jewel-match-save.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Save backup exported.');
   }
@@ -88,7 +89,7 @@
     if(!raw)return;
     try { const d=JSON.parse(raw); if(!d||d.app!=='Jewel Match'||d.format!==1||!d.progress||typeof d.progress!=='object'||Array.isArray(d.progress))throw Error('invalid');
       const allowed=new Set(['jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist']);
-      Object.entries(d.progress).forEach(([k,v])=>{if(allowed.has(k)&&typeof v==='string')localStorage.setItem(k,v);});window.location.reload();
+      Object.entries(d.progress).forEach(([k,v])=>{if((allowed.has(k)||/^jewel-match-daily-best-\\d{4}-\\d{2}-\\d{2}$/.test(k))&&typeof v==='string')localStorage.setItem(k,v);});window.location.reload();
     } catch (_) {showToast('Import failed: invalid Jewel Match backup.');}
   }
   function showSaveTools() { showModal({symbol:'💾',eyebrow:'YOUR PROGRESS, YOUR DEVICE',title:'Save tools',copy:'Export a JSON backup or import a backup by pasting its contents. Progress stays on this device; there is no account or database. Import replaces matching local progress keys.',actions:[{label:'Export save JSON',run:exportSave},{label:'Import save JSON',run:importSave},{label:'Close',run:hideModal}]}); }
@@ -334,7 +335,8 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), 1900);
   }
 
-  function showModal({ symbol = '✦', eyebrow = 'A MOMENT TO SHINE', title, copy, actions }) {
+  function showModal({ symbol = '✦', eyebrow = 'A MOMENT TO SHINE', title, copy, actions, celebration = false }) {
+    modalBackdrop.classList.toggle('victory-celebration', celebration);
     modalSymbol.textContent = symbol;
     modalEyebrow.textContent = eyebrow;
     modalTitle.textContent = title;
@@ -351,7 +353,7 @@
     modalBackdrop.classList.remove('hidden');
   }
 
-  function hideModal() { modalBackdrop.classList.add('hidden'); }
+  function hideModal() { modalBackdrop.classList.add('hidden'); modalBackdrop.classList.remove('victory-celebration'); }
 
   function recordDailyWin() {
     if (currentMode !== 'daily') return;
@@ -382,14 +384,14 @@
     } else if (currentMode === 'adventure') {
       currentTarget = 900 + currentLevel * 220;
       currentMoves = Math.max(17, 28 - Math.floor(currentLevel / 3));
-      levelGoal = currentLevel % 3 === 0 ? 'ice' : currentLevel % 4 === 0 ? 'collect' : 'score';
+      levelGoal = currentLevel % 10 === 0 ? 'ice' : currentLevel % 3 === 0 ? 'ice' : currentLevel % 4 === 0 ? 'collect' : 'score';
       goalTarget = levelGoal === 'ice' ? Math.min(12, 2 + Math.floor(currentLevel / 2)) : levelGoal === 'collect' ? 12 + currentLevel : currentTarget;
       goalProgress = 0;
     } else {
       currentTarget = CLASSIC_TARGET;
       currentMoves = CLASSIC_MOVES;
     }
-    $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : currentMode === 'adventure' ? 'SUGAR TRAIL · LEVEL ' + currentLevel : 'CRYSTAL QUEST';
+    $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : currentMode === 'adventure' ? (currentLevel % 10 === 0 ? 'SUGAR TRAIL · BOSS LEVEL ' : 'SUGAR TRAIL · LEVEL ') + currentLevel : 'CRYSTAL QUEST';
     gameRun++;
     runBestAtStart = best;
     personalBestCelebrated = false;
@@ -418,7 +420,7 @@
     renderBoard();
     ensurePossibleMove();
     $('#sound-toggle').textContent = soundOn ? '♫' : '♪';
-    message.textContent = currentMode === 'adventure' ? (levelGoal === 'ice' ? 'Clear every frozen tile and reach the score target!' : levelGoal === 'collect' ? 'Collect ' + goalTarget + ' candies of one colour and reach the score target!' : 'Reach the score target before moves run out!') : 'Match 3 or more candies. Swap, cascade, and make special candies!';
+    message.textContent = currentMode === 'adventure' ? (currentLevel % 10 === 0 ? 'BOSS CHALLENGE! Break every frozen tile and beat the score target!' : levelGoal === 'ice' ? 'Clear every frozen tile and reach the score target!' : levelGoal === 'collect' ? 'Collect ' + goalTarget + ' candies of one colour and reach the score target!' : 'Reach the score target before moves run out!') : 'Match 3 or more candies. Swap, cascade, and make special candies!';
     playTone(580, .1);
   }
 
@@ -611,9 +613,20 @@
       queuedBombs.add(key);
       bombQueue.push({ row, col, targetType });
     };
+    // Special-candy combos have distinct effects: colour + colour clears the board;
+    // colour + another special converts the colour bomb into that special's colour.
+    const forcedColourBombs = forcedBombs.filter(({ row, col }) => gemPower(board[row]?.[col]) === 'color');
+    if (forcedBombs.length > 1 && forcedColourBombs.length === 1) {
+      const colourBomb = forcedColourBombs[0];
+      const partner = forcedBombs.find((bomb) => bomb !== colourBomb);
+      if (partner) colourBomb.targetType = gemType(board[partner.row]?.[partner.col]);
+    }
     forcedBombs.forEach(({ row, col, targetType }) => enqueueBomb(row, col, targetType));
-    if (forcedBombs.length > 1) {
+    if (forcedBombs.length > 1 && forcedColourBombs.length > 1) {
       for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) cleared.add(row + ',' + col);
+      message.textContent = 'RAINBOW FUSION! THE WHOLE BOARD EXPLODES!';
+    } else if (forcedBombs.length > 1) {
+      message.textContent = forcedColourBombs.length === 1 ? 'RAINBOW SUPER COMBO! One colour turns into a special-candy chain!' : 'SUPER COMBO! Special-candy blasts combine!';
     }
     matches.forEach(([row, col]) => {
       if (isBomb(board[row][col])) enqueueBomb(row, col);
@@ -766,7 +779,8 @@
       recordDailyWin();
       gamesWon++;
       const moveBonus=moves*100;
-      const chestBonus=gamesWon%5===0||(currentMode==='adventure'&&currentLevel%10===0)?50:0;
+      const bossLevel = currentMode === 'adventure' && currentLevel % 10 === 0;
+      const chestBonus = bossLevel ? 100 : gamesWon % 5 === 0 ? 50 : 0;
       score+=moveBonus;
       const reward=(currentMode==='daily'?75:currentMode==='adventure'?40+currentLevel*5:20)+moves*5+chestBonus;
       crystalCoins += reward;
@@ -781,9 +795,10 @@
       if(chestBonus) showToast('🧰 TREASURE CHEST! +'+chestBonus+' bonus coins!');
       else showToast('+'+reward+' coins · +'+moveBonus.toLocaleString()+' unused-move bonus!');
       showModal({
-        eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : currentMode === 'adventure' ? 'LEVEL COMPLETE · LEVEL ' + currentLevel : 'CRYSTAL QUEST COMPLETE',
-        symbol: '✧', title: 'You sparkle!',
-        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins including +' + (moves*5) + ' for unused moves' + (chestBonus?' and a treasure chest bonus of '+chestBonus+' coins':'') + '. ' + (currentMode === 'adventure' ? 'Stars earned: ' + '★'.repeat(Number(levelStars[currentLevel]) || 1) + '☆'.repeat(3 - (Number(levelStars[currentLevel]) || 1)) + '. Next up: Level ' + adventureLevel + '. ' : currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
+        eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : currentMode === 'adventure' ? (bossLevel ? 'BOSS DEFEATED · LEVEL ' : 'LEVEL COMPLETE · LEVEL ') + currentLevel : 'CRYSTAL QUEST COMPLETE',
+        symbol: bossLevel ? '👑' : '✧', title: bossLevel ? 'Boss defeated!' : 'You sparkle!',
+        celebration: true,
+        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins including +' + (moves*5) + ' for unused moves' + (chestBonus?' and a treasure chest bonus of '+chestBonus+' coins':'') + '. ' + (bossLevel ? 'Boss chest claimed! ' : '') + (currentMode === 'adventure' ? 'Stars earned: ' + '★'.repeat(Number(levelStars[currentLevel]) || 1) + '☆'.repeat(3 - (Number(levelStars[currentLevel]) || 1)) + '. Next up: Level ' + adventureLevel + '. ' : currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
         actions: [
           { label: currentMode === 'adventure' ? 'Next level' : 'Play again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
