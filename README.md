@@ -52,7 +52,7 @@ Keyboard shortcuts:
 | **M** | Toggle sound |
 | **Arrow keys** | Move keyboard focus between board tiles |
 
-The game also pauses when you switch away from its browser tab. Boards with no valid moves are reshuffled automatically.
+Undo is available during an active round after a valid move resolves; it is disabled while paused or a dialog is open to avoid undoing a completed result. The game also pauses when you switch away from its browser tab. Boards with no valid moves are reshuffled automatically.
 
 ## Features
 
