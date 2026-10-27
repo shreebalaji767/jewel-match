@@ -89,7 +89,7 @@
     if(!raw)return;
     try { const d=JSON.parse(raw); if(!d||d.app!=='Jewel Match'||d.format!==1||!d.progress||typeof d.progress!=='object'||Array.isArray(d.progress))throw Error('invalid');
       const allowed=new Set(['jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist']);
-      Object.entries(d.progress).forEach(([k,v])=>{if((allowed.has(k)||/^jewel-match-daily-best-\\d{4}-\\d{2}-\\d{2}$/.test(k))&&typeof v==='string')localStorage.setItem(k,v);});window.location.reload();
+      Object.entries(d.progress).forEach(([k,v])=>{if((allowed.has(k)||/^jewel-match-daily-best-\d{4}-\d{2}-\d{2}$/.test(k))&&typeof v==='string')localStorage.setItem(k,v);});window.location.reload();
     } catch (_) {showToast('Import failed: invalid Jewel Match backup.');}
   }
   function showSaveTools() { showModal({symbol:'💾',eyebrow:'YOUR PROGRESS, YOUR DEVICE',title:'Save tools',copy:'Export a JSON backup or import a backup by pasting its contents. Progress stays on this device; there is no account or database. Import replaces matching local progress keys.',actions:[{label:'Export save JSON',run:exportSave},{label:'Import save JSON',run:importSave},{label:'Close',run:hideModal}]}); }
@@ -782,6 +782,9 @@
       const bossLevel = currentMode === 'adventure' && currentLevel % 10 === 0;
       const chestBonus = bossLevel ? 100 : gamesWon % 5 === 0 ? 50 : 0;
       score+=moveBonus;
+      if(score>best){best=score;if(best>runBestAtStart&&!personalBestCelebrated){personalBestCelebrated=true;showToast('New personal best!');}}
+      saveDailyBest();
+      saveBest();
       const reward=(currentMode==='daily'?75:currentMode==='adventure'?40+currentLevel*5:20)+moves*5+chestBonus;
       crystalCoins += reward;
       if (currentMode === 'adventure') {
