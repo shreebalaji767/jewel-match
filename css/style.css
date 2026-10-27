@@ -311,3 +311,14 @@ body{background:radial-gradient(ellipse at 50% 8%,#6b2ca2 0,#35145d 45%,#1d103a 
 .tile .gem.bomb-gift{border:2px solid #fff5;background:repeating-linear-gradient(45deg,#fff8 0 3px,transparent 3px 7px),linear-gradient(145deg,#ffe98a,#ff9c45 48%,#ff5bb7)!important;border-radius:24%!important;box-shadow:inset 0 3px 0 #ffffffb0,0 0 0 2px #ffe66d,0 0 16px #ffb8df;animation:giftBoxPulse .9s ease-in-out infinite alternate}
 @keyframes giftBoxPulse{from{filter:brightness(1.05) drop-shadow(0 0 4px #ffe98a)}to{filter:brightness(1.4) drop-shadow(0 0 13px #ff8ccf)}}
 @media(prefers-reduced-motion:reduce){.tile .gem.bomb-gift{animation:none}}
+
+
+/* Upgrade pack: quick tools, keyboard focus, touch ergonomics and small-screen polish. */
+.quick-tools{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+#shuffle-button{border-color:#ffe58b65;background:linear-gradient(125deg,#ffdf7b22,#ff82cb22)}
+.tile:focus-visible,.icon-button:focus-visible,.primary-button:focus-visible,.secondary-button:focus-visible,.daily-button:focus-visible,.install-button:focus-visible,.back-button:focus-visible{outline:3px solid #fff2a0;outline-offset:3px}
+.game-board{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.tile{touch-action:manipulation}
+button:disabled{cursor:not-allowed;opacity:.65}
+@media(max-width:520px){.game-controls{gap:8px}.game-controls>p{font-size:9px;line-height:1.6}.quick-tools{width:100%;order:0}.game-controls>p{order:1}.game-controls>#restart-button{order:2}.quick-tools .secondary-button{flex:1;min-width:0;justify-content:center}.score-strip{gap:6px}.score-card{padding:10px 6px}}
+@media(hover:none){.tile:hover{filter:none}}
