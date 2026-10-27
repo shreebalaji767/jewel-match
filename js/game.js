@@ -156,13 +156,13 @@
         tile.setAttribute('role', 'gridcell');
         const type = gemType(board[row][col]);
         const power = gemPower(board[row][col]);
-        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : 'line bomb') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
+        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'gift' ? 'candy reward box' : power === 'wrapped' ? 'wrapped bomb' : 'line bomb') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
         const gem = document.createElement('span');
         gem.className = 'gem ' + type + (power ? ' special-gem bomb-' + power : '');
         if (power) {
           const mark = document.createElement('span');
           mark.className = 'bomb-mark';
-          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'row' ? '↔' : '↕';
+          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'gift' ? '🎁' : power === 'row' ? '↔' : '↕';
           mark.setAttribute('aria-hidden', 'true');
           tile.appendChild(mark);
         }
@@ -444,8 +444,8 @@
       const run = runs[0];
       const offset = Math.floor(run.length / 2);
       specialPosition = run.direction === 'row'
-        ? { row: run.row, col: run.col + offset, power: run.length >= 5 ? 'color' : 'row', type: run.type }
-        : { row: run.row + offset, col: run.col, power: run.length >= 5 ? 'color' : 'column', type: run.type };
+        ? { row: run.row, col: run.col + offset, power: run.length >= 5 ? 'color' : 'gift', type: run.type }
+        : { row: run.row + offset, col: run.col, power: run.length >= 5 ? 'color' : 'gift', type: run.type };
     }
 
     const bombQueue = [];
@@ -487,11 +487,17 @@
       } else if (power === 'column') {
         for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
         message.textContent = 'STRIPED CANDY! The whole column clears!';
-      } else if (power === 'wrapped') {
+      } else if (power === 'wrapped' || power === 'gift') {
         for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++) {
           for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) cleared.add(row + ',' + col);
         }
-        message.textContent = 'WRAPPED CANDY! BOOM!';
+        if (power === 'gift') {
+          const giftReward = 5 + Math.min(20, currentLevel || 1);
+          crystalCoins += giftReward;
+          persistProgress();
+          showToast('🎁 Candy box opened! +' + giftReward + ' free coins!');
+          message.textContent = 'CANDY GIFT BOX! 3×3 BLAST + ' + giftReward + ' COINS!';
+        } else message.textContent = 'WRAPPED CANDY! BOOM!';
       }
       // Bombs caught in an explosion chain-detonate, just like in match-three arcade games.
       for (const key of cleared) {
@@ -506,7 +512,7 @@
     if (specialPosition) {
       cleared.delete(specialPosition.row + ',' + specialPosition.col);
       board[specialPosition.row][specialPosition.col] = specialPosition.type + '|' + specialPosition.power;
-      showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : '✦ Line bomb created!');
+      showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : specialPosition.power === 'gift' ? '🎁 Candy gift box created! Match or blast it for a 3×3 explosion + free coins!' : '✦ Special candy created!');
     }
     const clearCoords = [...cleared].map((key) => key.split(',').map(Number));
     clearCoords.forEach(([row, col]) => {
