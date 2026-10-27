@@ -262,3 +262,42 @@ button:focus-visible,a:focus-visible{outline:3px solid #f8dba3;outline-offset:3p
 @keyframes scoreSpark{from{opacity:0;transform:translateY(5px) scale(.7)}35%{opacity:1}to{opacity:0;transform:translateY(-12px) scale(1.2)}}
 @media(max-width:760px){.progress-rewards{justify-content:center;gap:7px}.progress-rewards span{font-size:10px;padding:7px}}
 @media(prefers-reduced-motion:reduce){.tile .gem.bomb-color{animation:none}.tile.matching::after{animation:none}}
+
+
+/* Candy-puzzle inspired gameplay skin */
+:root{--bg:#211044;--panel:#3b1a68;--muted:#d7b8f3;--text:#fff9ff;--gold:#ffe66d;--pink:#ff83cb;--line:#ffffff25}
+body{background:radial-gradient(ellipse at 50% 8%,#6b2ca2 0,#35145d 45%,#1d103a 100%)}
+.ambient-one{background:#ff5eaf;opacity:.16}.ambient-two{background:#ffcc4a;opacity:.15}
+.board-frame{padding:9px;border-radius:22px;background:linear-gradient(145deg,#ffdb7d,#f779c5 36%,#8e5bfa 72%,#6adcf4);box-shadow:0 15px 0 #35145b,0 22px 55px #140524a8,inset 0 2px 0 #fff9;border:2px solid #fff8}
+.game-board{gap:5px;padding:6px;border-radius:14px;background:linear-gradient(145deg,#5a268c,#35145d);box-shadow:inset 0 3px 9px #21083b}
+.tile{border:0;border-radius:12px;padding:7%;background:linear-gradient(145deg,#6c329b,#492071);box-shadow:inset 0 2px 0 #ffffff25,inset 0 -3px 0 #200b3a55;transition:transform .12s,filter .12s,background .12s}
+.tile:hover{background:linear-gradient(145deg,#8241b2,#56267e)}
+.tile.selected{background:#ffdc78;border:2px solid #fff;box-shadow:0 0 0 3px #ff81d3,0 0 22px #ffdf7b;transform:scale(.92)}
+.tile .gem{width:90%;height:90%;clip-path:none;border-radius:28%;filter:drop-shadow(0 3px 1px #28083f75);box-shadow:inset 0 3px 0 #ffffffa8,inset 0 -4px 0 #00000025,0 3px 0 #220d3d55;transform:rotate(-3deg)}
+.tile .gem:before{inset:7% 12% 48%;clip-path:none;border-radius:100%;background:linear-gradient(#ffffffa8,#ffffff08);filter:blur(.3px)}
+.tile .gem:after{top:15%;left:19%;width:14%;height:14%;border-radius:50%;background:#fff9;filter:none;transform:none}
+.tile .gem.ruby{background:linear-gradient(145deg,#ff8a9c,#ff3769 52%,#c4004b)!important;border-radius:38% 38% 32% 32%}
+.tile .gem.sapphire{background:linear-gradient(145deg,#8de9ff,#26a9ff 50%,#2865e8)!important;border-radius:50%}
+.tile .gem.emerald{background:linear-gradient(145deg,#9cff8c,#35e478 50%,#0aa968)!important;border-radius:28% 50% 28% 50%}
+.tile .gem.amethyst{background:linear-gradient(145deg,#f9aaff,#d64eff 50%,#8427d9)!important;border-radius:45% 45% 35% 35%}
+.tile .gem.topaz{background:linear-gradient(145deg,#fff38e,#ffc52e 50%,#f17b13)!important;border-radius:50% 50% 35% 35%}
+.tile .gem.diamond{background:linear-gradient(145deg,#fff,#a8f9ff 48%,#42bbdc)!important;border-radius:40% 40% 50% 50%}
+.tile .gem.special-gem{border:2px solid #fff;box-shadow:inset 0 3px 0 #ffffffb0,0 0 0 2px #ffe56c,0 0 15px #fff8}
+.tile .gem.bomb-row,.tile .gem.bomb-column{background:repeating-linear-gradient(0deg,#fff8 0 3px,transparent 3px 7px),linear-gradient(145deg,#ffdf6e,#ff6db7)!important}
+.tile .gem.bomb-color{border-radius:50%!important;background:conic-gradient(#ff647c,#ffd76b,#69e8bd,#75b8ff,#c68cff,#ff647c)!important}
+.tile .gem.bomb-wrapped{background:repeating-linear-gradient(45deg,#ffffff50 0 4px,transparent 4px 8px),linear-gradient(145deg,#ffdf6e,#ff6db7)!important}
+.bomb-mark{position:absolute;z-index:2;top:2px;right:3px;font-size:clamp(9px,1.5vw,15px);font-weight:1000;color:white;text-shadow:0 2px 3px #4d1b70}
+.objective-pill{display:table;margin:9px auto 12px;padding:6px 14px;border-radius:999px;background:linear-gradient(90deg,#fff0a7,#ffb8e1);color:#57206f;font-size:11px;font-weight:900;box-shadow:0 3px 0 #57206f55}
+.score-card{border-radius:14px;background:linear-gradient(145deg,#58278a,#3d1a68);border:1px solid #ffffff20;box-shadow:inset 0 1px 0 #ffffff20}
+.score-card strong{color:#fff2a4}.goal-card strong{color:#ffb6e5}.progress-track{height:8px;background:#1e0a39;border:1px solid #ffffff20;border-radius:99px}.progress-fill{background:linear-gradient(90deg,#7ef5d3,#fff17d,#ff8fce);border-radius:99px}
+.adventure-button,.level-map-button{border-color:#ffffff35;background:linear-gradient(125deg,#ffffff16,#ffb4e21b)}
+.adventure-button .daily-icon,.level-map-button .daily-icon{background:#ffffff1b;color:#ffe88a}
+.modal{background:linear-gradient(150deg,#61288d,#35145e 70%,#2a1249);border:1px solid #ffffff35;box-shadow:0 25px 90px #10051dbb;border-radius:24px}
+.modal-actions{max-height:48vh;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.modal-actions .primary-button,.modal-actions .secondary-button{min-width:0;width:100%;justify-content:center;text-align:center;gap:6px;padding:12px 10px;border-radius:13px;font-size:12px}
+.modal-actions .primary-button{background:linear-gradient(110deg,#fff08c,#ff91cb);color:#511b6e}
+@keyframes candyWiggle{0%,100%{transform:rotate(-3deg) scale(1)}50%{transform:rotate(4deg) scale(1.13)}}
+.tile.matching .gem{animation:candyWiggle .23s ease-in forwards}
+.tile.bomb-slowmo .gem{filter:brightness(1.3) saturate(1.3) drop-shadow(0 0 8px #fff)!important}
+@media(max-width:760px){.board-frame{padding:5px;border-radius:16px}.game-board{gap:3px;padding:4px}.tile{border-radius:8px}.objective-pill{margin:7px auto 9px}}
+@media(prefers-reduced-motion:reduce){.tile.matching .gem{animation:none}}
