@@ -114,13 +114,22 @@
 
   function showLevelMap() {
     const actions = [];
+    const worlds = [
+      { icon: '🍓', name: 'Berry Grove' }, { icon: '🍋', name: 'Lemon Lagoon' },
+      { icon: '🍇', name: 'Grape Galaxy' }, { icon: '🍊', name: 'Citrus Canyon' },
+      { icon: '🍭', name: 'Candy Castle' }, { icon: '💎', name: 'Crystal Caves' },
+      { icon: '🍰', name: 'Sugar Summit' }, { icon: '🌈', name: 'Rainbow Ridge' },
+      { icon: '🍬', name: 'Sweetwood' }, { icon: '👑', name: 'Royal Confection' }
+    ];
     for (let level = 1; level <= 100; level++) {
       const stars = Number(levelStars[level]) || 0;
-      actions.push({ label: 'Level ' + level + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '· · ·'), run: () => startGame('adventure', level) });
+      const world = worlds[Math.floor((level - 1) / 10)];
+      const boss = level % 10 === 0;
+      const label = boss ? '👑 BOSS ' + level : world.icon + ' ' + level;
+      actions.push({ label: label + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '· · ·'), run: () => startGame('adventure', level) });
     }
     actions.push({ label: 'Close map', run: hideModal });
-    const worlds=['🍓 Berry Grove','🍋 Lemon Lagoon','🍇 Grape Galaxy','🍊 Citrus Canyon','🍭 Candy Castle','💎 Crystal Caves','🍰 Sugar Summit','🌈 Rainbow Ridge','🍬 Sweetwood','👑 Royal Confection'];
-    showModal({symbol:'🍬',eyebrow:'SUGAR TRAIL · 10 WORLDS',title:'Choose a level',copy:'Worlds: '+worlds.join(' · ')+'. Every 10th level is a free boss challenge with a bigger reward. All levels are open to everyone.',actions});
+    showModal({symbol:'🗺',eyebrow:'SUGAR TRAIL · 10 WORLDS',title:'Choose a level',copy:worlds.map((world,index)=>((index+1)+'. '+world.name)).join('  •  ')+'. Every 10th level is a boss challenge with frozen tiles and a 100-coin chest. All 100 levels are free and open to everyone.',actions});
   }
 
   function dailyGiftClaimedToday() {
