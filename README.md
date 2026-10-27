@@ -16,7 +16,7 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
 - **Crystal Quest:** score at least 1,500 points in 25 moves.
 - **Daily Challenge:** a date-based target with 20 moves. Wins can build your daily streak on the current browser.
 - **Sugar Trail:** 100 selectable levels with rising score targets, move limits, collectible-candy and frozen-tile objectives, and up to three stars per level.
-- **Crystal Coins & Records:** earn coins from victories and gift boxes. Wins, coins, best chain, level stars, best scores, and progress are saved locally in your browser.
+- **Crystal Coins & Records:** earn coins from victories and gift boxes, plus claim a **free 50-coin daily gift** once per local calendar day. Wins, coins, best chain, level stars, best scores, and progress are saved locally in your browser.
 
 ## How to play
 
@@ -33,6 +33,7 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
 
 ## Free tools and controls
 
+- **Daily crystal gift:** claim 50 free coins from the home screen once per local calendar day. The claim and coin balance are stored locally; no account or internet connection is needed after the app is loaded.
 - **Hint:** highlights a possible move.
 - **Free shuffle:** reshuffles the board without spending a move or removing frozen objectives.
 - **Undo move:** reverses your most recent valid move. It restores the previous board, score, moves, frozen tiles, level-objective progress, coins, and best-chain value. Only the latest valid move can be undone; a new valid move creates a new undo point.
@@ -59,7 +60,7 @@ Undo is available during an active round after a valid move resolves; it is disa
 - Responsive desktop, tablet, and mobile layouts.
 - Glossy candy-style gems, animated special candies, cascading matches, chain explosions, and slow-motion bomb effects.
 - Installable Progressive Web App (PWA), with service-worker caching for offline play after the first successful load.
-- Locally saved progress, level stars, coins, wins, records, sound preference, and daily challenge streak.
+- Locally saved progress, level stars, coins, wins, records, sound preference, daily challenge streak, and daily-gift claim date.
 - Mouse, keyboard, tap, and touch-swipe controls.
 - Sound effects generated with the browser's Web Audio API.
 - Reduced-motion styling for players who prefer fewer animations.
