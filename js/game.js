@@ -847,7 +847,7 @@
           ? 'You scored ' + score.toLocaleString() + ' points and reached your target!'
           : 'You scored ' + score.toLocaleString() + ' points. ' + (score < currentTarget ? 'You were ' + (currentTarget - score).toLocaleString() + ' points away. ' : currentMode === 'adventure' && levelGoal === 'ice' ? iceRemaining + ' frozen tiles remain. ' : currentMode === 'adventure' && levelGoal === 'collect' ? Math.max(0, goalTarget - goalProgress) + ' candies still to collect. ' : '') + 'Try again?',
         actions: [
-          { label: 'Try again', run: () => startGame(currentMode) },
+          { label: currentMode === 'adventure' ? '↻ Replay Level ' + currentLevel : '↻ Play Again', run: () => startGame(currentMode, currentMode === 'adventure' ? currentLevel : null) },
           { label: 'Back to home', run: goHome }
         ]
       });
