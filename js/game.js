@@ -71,6 +71,39 @@
     showModal({ symbol: '🍬', eyebrow: 'SUGAR TRAIL', title: 'Choose a level', copy: 'All 100 levels are free to play. Pick any level, retry without limits, and earn up to three stars. No ads, purchases, or paywalls.', actions });
   }
 
+  function dailyGiftClaimedToday() {
+    try { return localStorage.getItem('jewel-match-daily-gift-date') === todayKey(); } catch (_) { return false; }
+  }
+
+  function updateDailyGiftButton() {
+    const button = $('#daily-gift-button');
+    if (!button) return;
+    const claimed = dailyGiftClaimedToday();
+    button.disabled = claimed;
+    button.classList.toggle('claimed', claimed);
+    const title = $('#daily-gift-title');
+    const copy = $('#daily-gift-copy');
+    const status = $('#daily-gift-status');
+    if (title) title.textContent = claimed ? 'Daily gift claimed' : 'Daily crystal gift';
+    if (copy) copy.textContent = claimed ? 'Come back tomorrow for 50 coins' : 'Claim 50 free coins today';
+    if (status) status.textContent = claimed ? '✓' : '＋';
+    button.setAttribute('aria-label', claimed ? 'Daily crystal gift already claimed today' : 'Claim 50 free crystal coins');
+  }
+
+  function claimDailyGift() {
+    if (dailyGiftClaimedToday()) {
+      updateDailyGiftButton();
+      showToast('Your next free gift arrives tomorrow!');
+      return;
+    }
+    crystalCoins += 50;
+    try { localStorage.setItem('jewel-match-daily-gift-date', todayKey()); } catch (_) {}
+    persistProgress();
+    updateDailyGiftButton();
+    playTone(660, .12, 'triangle');
+    showToast('🎁 Daily gift claimed: +50 free coins!');
+  }
+
   function persistProgress() {
     try {
       localStorage.setItem('jewel-match-level', String(adventureLevel));
@@ -831,6 +864,8 @@
   $('#adventure-button').addEventListener('click', () => startGame('adventure'));
   const levelMapButton = $('#level-map-button');
   if (levelMapButton) levelMapButton.addEventListener('click', showLevelMap);
+  const dailyGiftButton = $('#daily-gift-button');
+  if (dailyGiftButton) dailyGiftButton.addEventListener('click', claimDailyGift);
   $('#pause-button').addEventListener('click', pauseGame);
   $('#exit-button').addEventListener('click', () => {
     showModal({
@@ -1014,4 +1049,5 @@
 
   saveBest();
   persistProgress();
+  updateDailyGiftButton();
 })();
