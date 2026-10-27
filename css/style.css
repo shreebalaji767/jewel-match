@@ -348,3 +348,13 @@ button:disabled{cursor:not-allowed;opacity:.65}
 
 /* Upgrade pack: achievements, save backups and accessibility settings. */
 .home-toolbox{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.home-toolbox .secondary-button{flex:1;min-width:115px;justify-content:center;padding:11px 10px;font-size:11px}.shape-assist{position:absolute;z-index:4;inset:0;display:grid;place-items:center;color:#fff;font-size:clamp(9px,1.9vw,16px);font-weight:1000;line-height:1;text-shadow:0 1px 3px #301046,0 0 5px #301046;pointer-events:none;opacity:.92}.reduced-effects *, .reduced-effects *::before, .reduced-effects *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}@media(max-width:520px){.home-toolbox{gap:6px}.home-toolbox .secondary-button{min-width:0;padding:10px 6px;font-size:10px}}
+
+
+/* Victory and boss celebrations */
+#modal-backdrop.victory-celebration{background:radial-gradient(circle at 50% 40%,#ffda7b2e,transparent 58%),#17072bd9}
+#modal-backdrop.victory-celebration .modal{animation:victoryPop .62s cubic-bezier(.18,.9,.28,1.2) both;border-color:#ffe68d;box-shadow:0 0 0 2px #ff91cb55,0 0 44px #ffe66d55,0 25px 90px #10051dbb}
+#modal-backdrop.victory-celebration .modal-symbol{animation:victoryTwinkle 1.2s ease-in-out infinite alternate}
+@keyframes victoryPop{0%{opacity:0;transform:translateY(24px) scale(.82)}65%{opacity:1;transform:translateY(-4px) scale(1.035)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes victoryTwinkle{from{transform:rotate(-9deg) scale(.92);filter:drop-shadow(0 0 2px #ffe66d)}to{transform:rotate(9deg) scale(1.12);filter:drop-shadow(0 0 14px #ffe66d)}}
+@media(prefers-reduced-motion:reduce){#modal-backdrop.victory-celebration .modal,#modal-backdrop.victory-celebration .modal-symbol{animation:none!important}}
+body.reduced-effects #modal-backdrop.victory-celebration .modal,body.reduced-effects #modal-backdrop.victory-celebration .modal-symbol{animation:none!important}
