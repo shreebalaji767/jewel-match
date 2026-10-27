@@ -8,6 +8,10 @@
   let currentTarget = CLASSIC_TARGET;
   let currentMoves = CLASSIC_MOVES;
   let currentMode = 'classic';
+  let adventureLevel = readNumber('jewel-match-level', 1);
+  let crystalCoins = readNumber('jewel-match-coins', 0);
+  let gamesWon = readNumber('jewel-match-wins', 0);
+  let bestChain = readNumber('jewel-match-best-chain', 0);
   const $ = (selector) => document.querySelector(selector);
   const homeScreen = $('#home-screen');
   const gameScreen = $('#game-screen');
@@ -38,6 +42,23 @@
   let dailyStreak = readDailyStreak();
   try { soundOn = localStorage.getItem('jewel-match-sound') !== 'off'; } catch (_) {}
 
+  function readNumber(key, fallback = 0) {
+    try { return Math.max(0, Number(localStorage.getItem(key)) || fallback); } catch (_) { return fallback; }
+  }
+
+  function persistProgress() {
+    try {
+      localStorage.setItem('jewel-match-level', String(adventureLevel));
+      localStorage.setItem('jewel-match-coins', String(crystalCoins));
+      localStorage.setItem('jewel-match-wins', String(gamesWon));
+      localStorage.setItem('jewel-match-best-chain', String(bestChain));
+    } catch (_) {}
+    const levelNode = $('#level-home'); if (levelNode) levelNode.textContent = adventureLevel;
+    const coinsNode = $('#coins-home'); if (coinsNode) coinsNode.textContent = crystalCoins.toLocaleString();
+    const winsNode = $('#wins-home'); if (winsNode) winsNode.textContent = gamesWon;
+    const chainNode = $('#chain-home'); if (chainNode) chainNode.textContent = bestChain;
+  }
+
   function readBest() {
     try { return Number(localStorage.getItem('jewel-match-best')) || 0; }
     catch (_) { return 0; }
@@ -55,6 +76,7 @@
     if (streakNode) streakNode.textContent = dailyStreak;
     const dailyBestNode = $('#daily-best-home');
     if (dailyBestNode) dailyBestNode.textContent = 'TODAY  ' + readTodayBest().toLocaleString();
+    persistProgress();
   }
 
   function todayKey() {
@@ -213,11 +235,14 @@
       const dayKey = today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate();
       currentTarget = 1800 + (dayKey % 8) * 100;
       currentMoves = 20;
+    } else if (currentMode === 'adventure') {
+      currentTarget = 1000 + adventureLevel * 250;
+      currentMoves = Math.max(16, 27 - Math.floor(adventureLevel / 3));
     } else {
       currentTarget = CLASSIC_TARGET;
       currentMoves = CLASSIC_MOVES;
     }
-    $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : 'CRYSTAL QUEST';
+    $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : currentMode === 'adventure' ? 'CRYSTAL ADVENTURE · LEVEL ' + adventureLevel : 'CRYSTAL QUEST';
     gameRun++;
     runBestAtStart = best;
     personalBestCelebrated = false;
@@ -373,7 +398,17 @@
     }
     runs.sort((a, b) => b.length - a.length);
     let specialPosition = null;
-    if (runs.length) {
+    // T/L crossings reward skilled play with a rainbow colour bomb.
+    for (const [row, col] of matches) {
+      const type = gemType(board[row][col]);
+      let horizontal = 1, vertical = 1;
+      for (let c = col - 1; c >= 0 && gemType(board[row][c]) === type; c--) horizontal++;
+      for (let c = col + 1; c < SIZE && gemType(board[row][c]) === type; c++) horizontal++;
+      for (let r = row - 1; r >= 0 && gemType(board[r][col]) === type; r--) vertical++;
+      for (let r = row + 1; r < SIZE && gemType(board[r][col]) === type; r++) vertical++;
+      if (horizontal >= 3 && vertical >= 3) { specialPosition = { row, col, power: 'color', type }; break; }
+    }
+    if (!specialPosition && runs.length) {
       const run = runs[0];
       const offset = Math.floor(run.length / 2);
       specialPosition = run.direction === 'row'
@@ -437,8 +472,11 @@
       const tile = boardElement.querySelector('.tile[data-row="' + row + '"][data-col="' + col + '"]');
       if (tile) tile.classList.add(triggeredBombs.size ? 'bomb-slowmo' : 'matching');
     });
-    const powerBonus = (runs.some((run) => run.length >= 5) ? 500 : runs.length ? 250 : 0) + Math.max(0, triggeredBombs.size - 1) * 150;
+    const powerBonus = (specialPosition?.power === 'color' || runs.some((run) => run.length >= 5) ? 500 : runs.length ? 250 : 0) + Math.max(0, triggeredBombs.size - 1) * 150 + (forcedBombs.length > 1 ? 500 : 0);
     score += clearCoords.length * 60 * (chain + 1) + powerBonus;
+    if (chain > bestChain) { bestChain = chain; persistProgress(); }
+    if (forcedBombs.length > 1) showToast('MEGA COMBO! +500 bonus');
+    else if (chain >= 2) showToast(chain >= 3 ? 'UNSTOPPABLE CASCADE!' : 'AMAZING CASCADE!');
     if (score > best) {
       best = score;
       if (best > runBestAtStart && !personalBestCelebrated) {
@@ -509,12 +547,20 @@
     }
     if (score >= currentTarget) {
       recordDailyWin();
+      gamesWon++;
+      const reward = currentMode === 'daily' ? 75 : currentMode === 'adventure' ? 40 + adventureLevel * 5 : 20;
+      crystalCoins += reward;
+      if (currentMode === 'adventure') adventureLevel++;
+      persistProgress();
+      if (gamesWon === 1) showToast('Achievement unlocked: First Victory!');
+      else if (gamesWon === 5) showToast('Achievement unlocked: Crystal Champion!');
+      else showToast('+' + reward + ' crystal coins earned!');
       showModal({
-        eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : 'CRYSTAL QUEST COMPLETE',
+        eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : currentMode === 'adventure' ? 'LEVEL COMPLETE · LEVEL ' + (adventureLevel - 1) : 'CRYSTAL QUEST COMPLETE',
         symbol: '✧', title: 'You sparkle!',
-        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. ' + (currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
+        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins. ' + (currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : currentMode === 'adventure' ? 'Next up: Level ' + adventureLevel + '. ' : '') + 'Beautifully played!',
         actions: [
-          { label: 'Play again', run: () => startGame(currentMode) },
+          { label: currentMode === 'adventure' ? 'Next level' : 'Play again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
         ]
       });
@@ -645,6 +691,7 @@
 
   $('#play-button').addEventListener('click', () => startGame('classic'));
   $('#daily-button').addEventListener('click', () => startGame('daily'));
+  $('#adventure-button').addEventListener('click', () => startGame('adventure'));
   $('#pause-button').addEventListener('click', pauseGame);
   $('#exit-button').addEventListener('click', () => {
     showModal({
@@ -809,4 +856,5 @@
   }
 
   saveBest();
+  persistProgress();
 })();
