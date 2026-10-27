@@ -417,7 +417,7 @@
     const clearCoords = [...cleared].map((key) => key.split(',').map(Number));
     clearCoords.forEach(([row, col]) => {
       const tile = boardElement.querySelector('.tile[data-row="' + row + '"][data-col="' + col + '"]');
-      if (tile) tile.classList.add('matching');
+      if (tile) tile.classList.add(triggeredBombs.size ? 'bomb-slowmo' : 'matching');
     });
     const powerBonus = (runs.some((run) => run.length >= 5) ? 500 : runs.length ? 250 : 0) + Math.max(0, triggeredBombs.size - 1) * 150;
     score += clearCoords.length * 60 * (chain + 1) + powerBonus;
@@ -434,7 +434,8 @@
       message.textContent = chain > 0 ? 'Combo x' + (chain + 1) + '! Beautiful chain reaction!' : 'Lovely match! Keep it going.';
     }
     playTone(triggeredBombs.size ? 780 : 440 + Math.min(clearCoords.length, 8) * 65, triggeredBombs.size ? .22 : .13, 'triangle');
-    await sleep(230);
+    // Let bomb blasts play out in deliberate slow motion before the board collapses.
+    await sleep(triggeredBombs.size ? 1050 : 230);
     if (runId !== gameRun) return;
     clearCoords.forEach(([row, col]) => {
       if (!specialPosition || row !== specialPosition.row || col !== specialPosition.col) board[row][col] = null;
