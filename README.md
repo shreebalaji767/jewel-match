@@ -24,13 +24,22 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
 1. Press **Play now**.
 2. Select a gem, then select an adjacent gem to swap.
 3. Match 3 or more gems of the same colour to score points.
-4. Match 4 candies in a line to create a **striped candy** that clears a row or column. Match 5 in a straight line to create a **colour bomb** that clears candies of a selected colour. T/L-shaped matches create a **wrapped candy** that explodes a 3×3 area. Match or swap special candies to trigger big cascades.
-5. Special candies caught in an explosion chain-detonate. Cascades multiply score, while striped, wrapped, and colour candies have distinct effects.
+4. Match **4 candies in a line** to create a **candy gift box**. Match **5 in a straight line** to create a **rainbow colour bomb** that clears candies of a selected colour. Match a **2×2 square** of the same colour to create a gift box, too. **T/L-shaped matches** create a wrapped candy that explodes a 3×3 area.
+5. Swap or match a gift box to trigger a **3×3 blast** and earn free crystal coins. Bombs caught in an explosion can chain-detonate, with dramatic slow-motion effects. Cascades and special combos earn bonus points.
 6. Reach **1,500 points in 25 moves** to complete the quest.
 7. Use **Hint**, **Free shuffle** (reshuffles candies without spending a move or removing frozen objectives), **Pause**, **Restart**, and **Exit to home** when needed. On a keyboard, press **P** or **Space** to pause/resume, **H** for a hint, **S** for a free shuffle, **R** to restart after confirmation, and **M** to toggle sound. When a gem tile is focused, use the **arrow keys** to move keyboard focus around the board. On touch screens, swipe a gem toward an adjacent gem to swap it.
 8. If the board runs out of valid moves, the game refreshes the board automatically.
 
 Victories award crystal coins (with a larger daily challenge reward), and your adventure level, coins, wins, and best chain are saved locally in this browser. Sound effects are generated in the browser with the Web Audio API. The game automatically pauses when you switch away from its tab, and the end-of-round dialog clearly distinguishes reaching the target from running out of moves. Sound preference, your best score, daily best score, and daily streak are saved locally in your browser. The game supports tap/click and swipe controls, gives hints, and automatically reshuffles stuck boards.
+
+## Features
+
+- Responsive layout for desktop, tablet, and mobile screens.
+- Installable Progressive Web App (PWA) with service-worker caching for offline play after the first successful load.
+- Locally saved progress, level stars, coins, records, sound preference, and daily challenge streak.
+- Keyboard, mouse/tap, and touch-swipe controls; hint and free-shuffle tools.
+- Generated sound effects via the Web Audio API; no external audio assets are needed.
+- No ads, account requirement, paid unlocks, or in-game purchases.
 
 ## Files
 
@@ -38,6 +47,8 @@ Victories award crystal coins (with a larger daily challenge reward), and your a
 - `css/style.css` — responsive layout, gem styling, effects, and animations
 - `js/game.js` — board generation, swaps, matching, scoring, cascades, hints, free shuffle, swipe controls, stuck-board recovery, and dialogs
 - `favicon.svg` — custom vector icon
+- `manifest.webmanifest` — PWA name, display mode, and install metadata
+- `sw.js` — offline asset caching and cache-version management
 
 ## Publish with GitHub Pages
 
