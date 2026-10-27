@@ -1,0 +1,48 @@
+name: Build 4K gameplay preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "media/jewel-match-gameplay.mp4"
+      - ".github/workflows/generate-4k-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render-4k:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Render 4K H.264 preview
+        run: |
+          mkdir -p media
+          ffmpeg -y -i media/jewel-match-gameplay.mp4 \
+            -vf "scale=3840:2160:flags=lanczos,format=yuv420p" \
+            -c:v libx264 -preset slow -crf 19 -profile:v high -level:v 5.1 \
+            -movflags +faststart -an media/jewel-match-gameplay-4k.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,codec_name -of default=noprint_wrappers=1 media/jewel-match-gameplay-4k.mp4
+
+      - name: Commit generated 4K preview
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add media/jewel-match-gameplay-4k.mp4
+          if git diff --cached --quiet; then
+            echo "No 4K asset changes."
+            exit 0
+          fi
+          git commit -m "Add 4K gameplay preview video"
+          git push origin HEAD:main
