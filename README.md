@@ -9,13 +9,13 @@ A colourful, responsive, Candy Crush-inspired match-three puzzle adventure built
 
 ## Always free — no monetization
 
-Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no subscriptions, and no paywalls**. All 100 Sugar Trail levels are available immediately. Hints, shuffles, and undo are free. Special candies, game modes, and retries are never sold. Crystal coins are earned in-game and are not required to unlock content. No account or paid server is required.
+Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no subscriptions, and no paywalls**. Sugar Trail levels continue indefinitely and any level can be selected immediately. Hints, shuffles, and undo are free. Special candies, game modes, and retries are never sold. Crystal coins are earned in-game and are not required to unlock content. No account or paid server is required.
 
 ## Game modes and progression
 
 - **Crystal Quest:** score at least 1,500 points in 25 moves.
 - **Daily Challenge:** a date-based target with 20 moves. Wins can build your daily streak on the current browser.
-- **Sugar Trail:** 100 selectable levels with rising score targets, move limits, collectible-candy and frozen-tile objectives, and up to three stars per level.
+- **Infinite Sugar Trail:** endless numbered levels, repeating themed worlds, rising score targets, move limits, collectible-candy and frozen-tile objectives, boss levels every 10 levels, and up to three stars per level. Choose any level number.
 - **Crystal Coins & Records:** earn coins from victories and gift boxes, plus claim a **free 50-coin daily gift** once per local calendar day. Wins, coins, best chain, level stars, best scores, and progress are saved locally in your browser.
 
 ## How to play
@@ -72,6 +72,7 @@ Undo is available during an active round after a valid move resolves; it is disa
 - `index.html` — landing page, game board, dialogs, and controls.
 - `css/style.css` — responsive layout, gem styling, animations, and control polish.
 - `js/game.js` — board generation, swaps, matching, scoring, cascades, hints, free shuffle, undo, swipe controls, progress, and dialogs.
+- `media/jewel-match-gameplay.mp4` — original generated looping gameplay-preview footage.
 - `favicon.svg` — vector app icon.
 - `manifest.webmanifest` — PWA metadata and install settings.
 - `sw.js` — offline asset caching and cache-version management.
@@ -91,7 +92,9 @@ The game uses relative asset paths so it can run from the repository's GitHub Pa
 
 - **Super combo scoring:** cascades use a multiplier up to ×5. Two colour bombs clear the whole board; a colour bomb paired with another special candy targets that candy's colour; other special combinations merge their blasts.
 - **Treasure chests:** every fifth victory and every 10th Sugar Trail milestone grants a free coin chest. Unused moves award bonus points and coins on victory.
-- **Ten themed Sugar Trail worlds:** themed regions and real boss levels at 10, 20, 30 … 100. Boss levels require clearing frozen tiles, feature a crown celebration, and award a 100-coin chest.
+- **Infinite Sugar Trail:** 10 themed worlds cycle forever; score targets and objectives scale with level, and every 10th level is a boss with frozen tiles and a 100-coin chest.
+- **Difficulty selection:** choose Easy, Normal, Hard, or Expert. Difficulty changes target scores, available moves, and frozen-tile objectives and is saved in localStorage.
+- **Gameplay preview:** the landing page includes an original, generated looping gameplay-demo video, muted and inline for autoplay compatibility.
 - **Achievement collection book:** earn rewards for victories, cascades, daily streaks, progress across 10 levels, and three-star clears. Achievements are saved locally.
 - **Accessibility settings:** reduce animation effects or enable gem shape markers for colour-independent play.
 - **Save backup tools:** export progress as a JSON file or import a previous backup by pasting its contents. Import replaces matching local progress keys on this browser; export a backup first.
