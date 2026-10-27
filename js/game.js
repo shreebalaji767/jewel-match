@@ -12,6 +12,12 @@
   let crystalCoins = readNumber('jewel-match-coins', 0);
   let gamesWon = readNumber('jewel-match-wins', 0);
   let bestChain = readNumber('jewel-match-best-chain', 0);
+  let currentLevel = adventureLevel;
+  let levelStars = readLevelStars();
+  let levelGoal = 'score';
+  let goalTarget = 0;
+  let goalProgress = 0;
+  let iceRemaining = 0;
   const $ = (selector) => document.querySelector(selector);
   const homeScreen = $('#home-screen');
   const gameScreen = $('#game-screen');
@@ -44,6 +50,24 @@
 
   function readNumber(key, fallback = 0) {
     try { return Math.max(0, Number(localStorage.getItem(key)) || fallback); } catch (_) { return fallback; }
+  }
+
+  function readLevelStars() {
+    try { return JSON.parse(localStorage.getItem('jewel-match-stars') || '{}') || {}; } catch (_) { return {}; }
+  }
+
+  function saveLevelStars() {
+    try { localStorage.setItem('jewel-match-stars', JSON.stringify(levelStars)); } catch (_) {}
+  }
+
+  function showLevelMap() {
+    const actions = [];
+    for (let level = 1; level <= Math.min(Math.max(1, adventureLevel), 20); level++) {
+      const stars = Number(levelStars[level]) || 0;
+      actions.push({ label: 'Level ' + level + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '· · ·'), run: () => startGame('adventure', level) });
+    }
+    actions.push({ label: 'Close map', run: hideModal });
+    showModal({ symbol: '🍬', eyebrow: 'SUGAR TRAIL', title: 'Choose a level', copy: 'Complete each level to unlock the next stop. Earn up to three stars for a high-score finish.', actions });
   }
 
   function persistProgress() {
@@ -138,7 +162,7 @@
         if (power) {
           const mark = document.createElement('span');
           mark.className = 'bomb-mark';
-          mark.textContent = power === 'color' ? '✹' : '✦';
+          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'row' ? '↔' : '↕';
           mark.setAttribute('aria-hidden', 'true');
           tile.appendChild(mark);
         }
@@ -228,21 +252,26 @@
     saveBest();
   }
 
-  function startGame(mode = currentMode) {
+  function startGame(mode = currentMode, requestedLevel = null) {
     currentMode = mode;
+    if (mode === 'adventure' && Number.isInteger(requestedLevel) && requestedLevel > 0) currentLevel = Math.min(requestedLevel, Math.max(1, adventureLevel));
+    else if (mode === 'adventure') currentLevel = adventureLevel;
     if (currentMode === 'daily') {
       const today = new Date();
       const dayKey = today.getFullYear() * 372 + today.getMonth() * 31 + today.getDate();
       currentTarget = 1800 + (dayKey % 8) * 100;
       currentMoves = 20;
     } else if (currentMode === 'adventure') {
-      currentTarget = 1000 + adventureLevel * 250;
-      currentMoves = Math.max(16, 27 - Math.floor(adventureLevel / 3));
+      currentTarget = 900 + currentLevel * 220;
+      currentMoves = Math.max(17, 28 - Math.floor(currentLevel / 3));
+      levelGoal = currentLevel % 3 === 0 ? 'ice' : currentLevel % 4 === 0 ? 'collect' : 'score';
+      goalTarget = levelGoal === 'ice' ? Math.min(12, 2 + Math.floor(currentLevel / 2)) : levelGoal === 'collect' ? 12 + currentLevel : currentTarget;
+      goalProgress = 0;
     } else {
       currentTarget = CLASSIC_TARGET;
       currentMoves = CLASSIC_MOVES;
     }
-    $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : currentMode === 'adventure' ? 'CRYSTAL ADVENTURE · LEVEL ' + adventureLevel : 'CRYSTAL QUEST';
+    $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily' ? 'DAILY CRYSTAL CHALLENGE' : currentMode === 'adventure' ? 'SUGAR TRAIL · LEVEL ' + currentLevel : 'CRYSTAL QUEST';
     gameRun++;
     runBestAtStart = best;
     personalBestCelebrated = false;
@@ -257,18 +286,19 @@
     paused = false;
     board = createBoard();
     ice = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
-    if (currentMode === 'adventure' && adventureLevel >= 3) {
-      const iceCount = Math.min(12, 2 + Math.floor(adventureLevel / 2));
+    if (currentMode === 'adventure' && (levelGoal === 'ice' || currentLevel >= 3)) {
+      const iceCount = levelGoal === 'ice' ? goalTarget : Math.min(12, 2 + Math.floor(currentLevel / 2));
       let placed = 0, attempts = 0;
       while (placed < iceCount && attempts++ < 100) {
         const row = Math.floor(Math.random() * SIZE), col = Math.floor(Math.random() * SIZE);
         if (!ice[row][col]) { ice[row][col] = true; placed++; }
       }
     }
+    iceRemaining = ice.flat().filter(Boolean).length;
     renderBoard();
     ensurePossibleMove();
     $('#sound-toggle').textContent = soundOn ? '♫' : '♪';
-    message.textContent = 'Match 3 or more gems of the same kind. Swipe or tap to swap.';
+    message.textContent = currentMode === 'adventure' ? (levelGoal === 'ice' ? 'Clear every frozen tile and reach the score target!' : levelGoal === 'collect' ? 'Collect ' + goalTarget + ' candies of one colour and reach the score target!' : 'Reach the score target before moves run out!') : 'Match 3 or more candies. Swap, cascade, and make special candies!';
     playTone(580, .1);
   }
 
@@ -406,7 +436,7 @@
       for (let c = col + 1; c < SIZE && gemType(board[row][c]) === type; c++) horizontal++;
       for (let r = row - 1; r >= 0 && gemType(board[r][col]) === type; r--) vertical++;
       for (let r = row + 1; r < SIZE && gemType(board[r][col]) === type; r++) vertical++;
-      if (horizontal >= 3 && vertical >= 3) { specialPosition = { row, col, power: 'color', type }; break; }
+      if (horizontal >= 3 && vertical >= 3) { specialPosition = { row, col, power: 'wrapped', type }; break; }
     }
     if (!specialPosition && runs.length) {
       const run = runs[0];
@@ -439,18 +469,24 @@
       const type = gemType(gem);
       if (!power) continue;
       if (power === 'color') {
+        const targetType = bomb.targetType || type;
         for (let row = 0; row < SIZE; row++) {
           for (let col = 0; col < SIZE; col++) {
-            if (gemType(board[row][col]) === type) cleared.add(row + ',' + col);
+            if (gemType(board[row][col]) === targetType) cleared.add(row + ',' + col);
           }
         }
         message.textContent = 'COLOR BOMB! Every gem of that colour explodes!';
       } else if (power === 'row') {
         for (let col = 0; col < SIZE; col++) cleared.add(bomb.row + ',' + col);
-        message.textContent = 'ROW BOMB! The whole row explodes!';
+        message.textContent = 'STRIPED CANDY! The whole row clears!';
       } else if (power === 'column') {
         for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
-        message.textContent = 'COLUMN BOMB! The whole column explodes!';
+        message.textContent = 'STRIPED CANDY! The whole column clears!';
+      } else if (power === 'wrapped') {
+        for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++) {
+          for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) cleared.add(row + ',' + col);
+        }
+        message.textContent = 'WRAPPED CANDY! BOOM!';
       }
       // Bombs caught in an explosion chain-detonate, just like in match-three arcade games.
       for (const key of cleared) {
@@ -495,7 +531,8 @@
     if (runId !== gameRun) return;
     clearCoords.forEach(([row, col]) => {
       if (specialPosition && row === specialPosition.row && col === specialPosition.col) { ice[row][col] = false; return; }
-      if (ice[row][col]) { ice[row][col] = false; return; }
+      if (ice[row][col]) { ice[row][col] = false; iceRemaining = Math.max(0, iceRemaining - 1); return; }
+      if (currentMode === 'adventure' && levelGoal === 'collect' && gemType(board[row][col]) === TYPES[(currentLevel - 1) % TYPES.length]) goalProgress++;
       board[row][col] = null;
     });
     for (let col = 0; col < SIZE; col++) {
@@ -522,7 +559,10 @@
     swap(first, second);
     renderBoard();
     const matches = findMatches();
-    const swappedBombs = [first, second].filter((point) => isBomb(board[point.row][point.col]));
+    const swappedBombs = [first, second].filter((point) => isBomb(board[point.row][point.col])).map((point) => {
+      const other = point.row === first.row && point.col === first.col ? second : first;
+      return { ...point, targetType: gemPower(board[point.row][point.col]) === 'color' && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null };
+    });
     if (!matches.length && !swappedBombs.length) {
       await sleep(150);
       if (runId !== gameRun) return;
@@ -545,20 +585,26 @@
       shuffleBoard();
       showToast('New board, same quest!');
     }
-    if (score >= currentTarget) {
+    const objectiveComplete = currentMode !== 'adventure' || (levelGoal === 'ice' ? iceRemaining === 0 : levelGoal === 'collect' ? goalProgress >= goalTarget : true);
+    if (score >= currentTarget && objectiveComplete) {
       recordDailyWin();
       gamesWon++;
       const reward = currentMode === 'daily' ? 75 : currentMode === 'adventure' ? 40 + adventureLevel * 5 : 20;
       crystalCoins += reward;
-      if (currentMode === 'adventure') adventureLevel++;
+      if (currentMode === 'adventure') {
+        const stars = score >= currentTarget * 1.8 ? 3 : score >= currentTarget * 1.35 ? 2 : 1;
+        levelStars[currentLevel] = Math.max(Number(levelStars[currentLevel]) || 0, stars);
+        saveLevelStars();
+        adventureLevel = Math.max(adventureLevel, currentLevel + 1);
+      }
       persistProgress();
       if (gamesWon === 1) showToast('Achievement unlocked: First Victory!');
       else if (gamesWon === 5) showToast('Achievement unlocked: Crystal Champion!');
       else showToast('+' + reward + ' crystal coins earned!');
       showModal({
-        eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : currentMode === 'adventure' ? 'LEVEL COMPLETE · LEVEL ' + (adventureLevel - 1) : 'CRYSTAL QUEST COMPLETE',
+        eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : currentMode === 'adventure' ? 'LEVEL COMPLETE · LEVEL ' + currentLevel : 'CRYSTAL QUEST COMPLETE',
         symbol: '✧', title: 'You sparkle!',
-        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins. ' + (currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : currentMode === 'adventure' ? 'Next up: Level ' + adventureLevel + '. ' : '') + 'Beautifully played!',
+        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins. ' + (currentMode === 'adventure' ? 'Stars earned: ' + '★'.repeat(Number(levelStars[currentLevel]) || 1) + '☆'.repeat(3 - (Number(levelStars[currentLevel]) || 1)) + '. Next up: Level ' + adventureLevel + '. ' : currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
         actions: [
           { label: currentMode === 'adventure' ? 'Next level' : 'Play again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
@@ -692,6 +738,8 @@
   $('#play-button').addEventListener('click', () => startGame('classic'));
   $('#daily-button').addEventListener('click', () => startGame('daily'));
   $('#adventure-button').addEventListener('click', () => startGame('adventure'));
+  const levelMapButton = $('#level-map-button');
+  if (levelMapButton) levelMapButton.addEventListener('click', showLevelMap);
   $('#pause-button').addEventListener('click', pauseGame);
   $('#exit-button').addEventListener('click', () => {
     showModal({
