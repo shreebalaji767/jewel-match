@@ -305,3 +305,9 @@ body{background:radial-gradient(ellipse at 50% 8%,#6b2ca2 0,#35145d 45%,#1d103a 
 
 /* Permanent free-to-play promise */
 .free-promise{color:#fff0a1!important;font-weight:900;letter-spacing:.055em;text-wrap:balance}.free-promise span{color:#ff91cb;padding:0 3px}.level-map-button{border-color:#ffe68d75}
+
+
+/* Candy gift boxes: match four to create a reward box; activate it for a 3x3 blast and free coins */
+.tile .gem.bomb-gift{border:2px solid #fff5;background:repeating-linear-gradient(45deg,#fff8 0 3px,transparent 3px 7px),linear-gradient(145deg,#ffe98a,#ff9c45 48%,#ff5bb7)!important;border-radius:24%!important;box-shadow:inset 0 3px 0 #ffffffb0,0 0 0 2px #ffe66d,0 0 16px #ffb8df;animation:giftBoxPulse .9s ease-in-out infinite alternate}
+@keyframes giftBoxPulse{from{filter:brightness(1.05) drop-shadow(0 0 4px #ffe98a)}to{filter:brightness(1.4) drop-shadow(0 0 13px #ff8ccf)}}
+@media(prefers-reduced-motion:reduce){.tile .gem.bomb-gift{animation:none}}
