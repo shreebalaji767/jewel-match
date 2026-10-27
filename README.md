@@ -8,11 +8,15 @@ Once GitHub Pages is enabled, play at:
 
 **https://shreebalaji767.github.io/jewel-match/**
 
+## Always free — no monetization
+
+Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no subscriptions, and no paywalls**. All 100 Sugar Trail levels are available immediately. Hints and retries cost nothing; special candies, combos, themes, and game modes are not sold. Crystal coins are earned only by playing and are never required to unlock content. Progress is saved locally in your browser. The game does not require an account or a paid server.
+
 ## Game modes
 
 - **Crystal Quest:** reach 1,500 points in 25 moves.
 - **Daily Challenge:** a date-based target that changes each day, with 20 moves to beat it. Win to build a daily streak on this browser.
-- **Sugar Trail:** a Candy Crush-inspired level progression map with rising score goals, move limits, collectible-candy levels, frozen-tile objectives, and up to three stars per level.
+- **Sugar Trail:** 100 fully unlocked levels with rising score goals, move limits, collectible-candy levels, frozen-tile objectives, and up to three stars per level.
 - **Crystal Coins & Records:** earn coins for victories and save wins, best chain length, and your next unlocked adventure level locally.
 
 ## How to play
