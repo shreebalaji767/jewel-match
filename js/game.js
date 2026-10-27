@@ -450,13 +450,16 @@
 
     const bombQueue = [];
     const queuedBombs = new Set();
-    const enqueueBomb = (row, col) => {
+    const enqueueBomb = (row, col, targetType = null) => {
       const key = row + ',' + col;
       if (queuedBombs.has(key)) return;
       queuedBombs.add(key);
-      bombQueue.push({ row, col });
+      bombQueue.push({ row, col, targetType });
     };
-    forcedBombs.forEach(({ row, col }) => enqueueBomb(row, col));
+    forcedBombs.forEach(({ row, col, targetType }) => enqueueBomb(row, col, targetType));
+    if (forcedBombs.length > 1) {
+      for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) cleared.add(row + ',' + col);
+    }
     matches.forEach(([row, col]) => {
       if (isBomb(board[row][col])) enqueueBomb(row, col);
     });
