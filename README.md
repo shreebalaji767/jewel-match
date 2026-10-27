@@ -1,61 +1,85 @@
 # Jewel Match ✦
 
-A polished, responsive candy-style match-three puzzle game built with plain HTML, CSS, and JavaScript. No framework, build step, external image, or audio file is required.
+A colourful, responsive, Candy Crush-inspired match-three puzzle adventure built with plain HTML, CSS, and JavaScript. No framework, build step, external images, or audio files are required.
 
 ## Play
 
-Once GitHub Pages is enabled, play at:
-
-**https://shreebalaji767.github.io/jewel-match/**
+**Live game:** https://shreebalaji767.github.io/jewel-match/  
+**Repository:** https://github.com/shreebalaji767/jewel-match
 
 ## Always free — no monetization
 
-Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no subscriptions, and no paywalls**. All 100 Sugar Trail levels are available immediately. Hints and retries cost nothing; special candies, combos, themes, and game modes are not sold. Crystal coins are earned only by playing and are never required to unlock content. Progress is saved locally in your browser. The game does not require an account or a paid server.
+Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no subscriptions, and no paywalls**. All 100 Sugar Trail levels are available immediately. Hints, shuffles, and undo are free. Special candies, game modes, and retries are never sold. Crystal coins are earned in-game and are not required to unlock content. No account or paid server is required.
 
-## Game modes
+## Game modes and progression
 
-- **Crystal Quest:** reach 1,500 points in 25 moves.
-- **Daily Challenge:** a date-based target that changes each day, with 20 moves to beat it. Win to build a daily streak on this browser.
-- **Sugar Trail:** 100 fully unlocked levels with rising score goals, move limits, collectible-candy levels, frozen-tile objectives, and up to three stars per level.
-- **Crystal Coins & Records:** earn coins for victories and save wins, best chain length, and your next unlocked adventure level locally.
+- **Crystal Quest:** score at least 1,500 points in 25 moves.
+- **Daily Challenge:** a date-based target with 20 moves. Wins can build your daily streak on the current browser.
+- **Sugar Trail:** 100 selectable levels with rising score targets, move limits, collectible-candy and frozen-tile objectives, and up to three stars per level.
+- **Crystal Coins & Records:** earn coins from victories and gift boxes. Wins, coins, best chain, level stars, best scores, and progress are saved locally in your browser.
 
 ## How to play
 
-1. Press **Play now**.
-2. Select a gem, then select an adjacent gem to swap.
-3. Match 3 or more gems of the same colour to score points.
-4. Match **4 candies in a line** to create a **candy gift box**. Match **5 in a straight line** to create a **rainbow colour bomb** that clears candies of a selected colour. Match a **2×2 square** of the same colour to create a gift box, too. **T/L-shaped matches** create a wrapped candy that explodes a 3×3 area.
-5. Swap or match a gift box to trigger a **3×3 blast** and earn free crystal coins. Bombs caught in an explosion can chain-detonate, with dramatic slow-motion effects. Cascades and special combos earn bonus points.
-6. Reach **1,500 points in 25 moves** to complete the quest.
-7. Use **Hint**, **Free shuffle** (reshuffles candies without spending a move or removing frozen objectives), **Pause**, **Restart**, and **Exit to home** when needed. On a keyboard, press **P** or **Space** to pause/resume, **H** for a hint, **S** for a free shuffle, **R** to restart after confirmation, and **M** to toggle sound. When a gem tile is focused, use the **arrow keys** to move keyboard focus around the board. On touch screens, swipe a gem toward an adjacent gem to swap it.
-8. If the board runs out of valid moves, the game refreshes the board automatically.
+1. Choose **Play now**, **Daily challenge**, or **Sugar Trail**.
+2. Select a gem, then select an adjacent gem to swap. On touch screens, swipe a gem toward an adjacent tile.
+3. Match at least three gems of the same colour to score points.
+4. Create special candies:
+   - **Four in a line:** creates a candy gift box.
+   - **Five in a straight line:** creates a rainbow colour bomb.
+   - **T/L-shaped match:** creates a wrapped candy.
+   - **Same-colour 2×2 square:** creates a gift box.
+5. Activate a gift box for a **3×3 blast and free crystal coins**. Explosions can trigger nearby special candies in chain reactions. Bomb reactions use dramatic slow-motion effects, and cascades earn bonus points.
+6. Reach the target score and complete any level objective before moves run out.
 
-Victories award crystal coins (with a larger daily challenge reward), and your adventure level, coins, wins, and best chain are saved locally in this browser. Sound effects are generated in the browser with the Web Audio API. The game automatically pauses when you switch away from its tab, and the end-of-round dialog clearly distinguishes reaching the target from running out of moves. Sound preference, your best score, daily best score, and daily streak are saved locally in your browser. The game supports tap/click and swipe controls, gives hints, and automatically reshuffles stuck boards.
+## Free tools and controls
+
+- **Hint:** highlights a possible move.
+- **Free shuffle:** reshuffles the board without spending a move or removing frozen objectives.
+- **Undo move:** reverses your most recent valid move. It restores the previous board, score, moves, frozen tiles, level-objective progress, coins, and best-chain value. Only the latest valid move can be undone; a new valid move creates a new undo point.
+- **Pause / Resume:** take a break at any time.
+- **Restart:** start the current mode or level again.
+- **Sound:** toggle generated sound effects.
+
+Keyboard shortcuts:
+
+| Key | Action |
+| --- | --- |
+| **P** or **Space** | Pause / resume |
+| **H** | Hint |
+| **S** | Free shuffle |
+| **U** | Undo the latest valid move |
+| **R** | Restart after confirmation |
+| **M** | Toggle sound |
+| **Arrow keys** | Move keyboard focus between board tiles |
+
+The game also pauses when you switch away from its browser tab. Boards with no valid moves are reshuffled automatically.
 
 ## Features
 
-- Responsive layout for desktop, tablet, and mobile screens.
-- Installable Progressive Web App (PWA) with service-worker caching for offline play after the first successful load.
-- Locally saved progress, level stars, coins, records, sound preference, and daily challenge streak.
-- Keyboard, mouse/tap, and touch-swipe controls; hint and free-shuffle tools.
-- Generated sound effects via the Web Audio API; no external audio assets are needed.
-- No ads, account requirement, paid unlocks, or in-game purchases.
+- Responsive desktop, tablet, and mobile layouts.
+- Glossy candy-style gems, animated special candies, cascading matches, chain explosions, and slow-motion bomb effects.
+- Installable Progressive Web App (PWA), with service-worker caching for offline play after the first successful load.
+- Locally saved progress, level stars, coins, wins, records, sound preference, and daily challenge streak.
+- Mouse, keyboard, tap, and touch-swipe controls.
+- Sound effects generated with the browser's Web Audio API.
+- Reduced-motion styling for players who prefer fewer animations.
+- No ads, external tracking SDKs, account requirement, paid unlocks, or in-game purchases.
 
-## Files
+## Project files
 
-- `index.html` — landing page, game board, dialogs, and controls
-- `css/style.css` — responsive layout, gem styling, effects, and animations
-- `js/game.js` — board generation, swaps, matching, scoring, cascades, hints, free shuffle, swipe controls, stuck-board recovery, and dialogs
-- `favicon.svg` — custom vector icon
-- `manifest.webmanifest` — PWA name, display mode, and install metadata
-- `sw.js` — offline asset caching and cache-version management
+- `index.html` — landing page, game board, dialogs, and controls.
+- `css/style.css` — responsive layout, gem styling, animations, and control polish.
+- `js/game.js` — board generation, swaps, matching, scoring, cascades, hints, free shuffle, undo, swipe controls, progress, and dialogs.
+- `favicon.svg` — vector app icon.
+- `manifest.webmanifest` — PWA metadata and install settings.
+- `sw.js` — offline asset caching and cache-version management.
 
 ## Publish with GitHub Pages
 
 1. Open the repository's **Settings**.
-2. Select **Pages** in the sidebar.
+2. Select **Pages**.
 3. Under **Build and deployment**, choose **Deploy from a branch**.
 4. Select branch **main** and folder **/(root)**, then save.
-5. Wait for GitHub Pages to finish publishing, then open the Play URL above.
+5. Wait for GitHub Pages to publish, then open the Play link above.
 
-The game uses relative file paths, so it works from the repository's GitHub Pages subpath.
+The game uses relative asset paths so it can run from the repository's GitHub Pages subpath.
