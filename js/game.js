@@ -185,11 +185,12 @@
 
   function updateUndoButton() {
     const button = $('#undo-button');
-    if (button) button.disabled = !undoSnapshot || busy;
+    const modalOpen = !modalBackdrop.classList.contains('hidden');
+    if (button) button.disabled = !undoSnapshot || busy || paused || modalOpen;
   }
 
   function undoLastMove() {
-    if (!undoSnapshot || busy) return;
+    if (!undoSnapshot || busy || paused || !modalBackdrop.classList.contains('hidden')) return;
     const snapshot = undoSnapshot;
     undoSnapshot = null;
     board = snapshot.board.map((row) => row.slice());
@@ -698,6 +699,7 @@
         ]
       });
       paused = true;
+      updateUndoButton();
     } else if (moves <= 0) {
       const targetReached = score >= currentTarget && objectiveComplete;
       showModal({
@@ -813,7 +815,7 @@
   function showHowToPlay() {
     showModal({
       symbol: '✧', eyebrow: 'YOUR CRYSTAL GUIDE', title: 'How to play',
-      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a row creates a row or column bomb; five creates a colour bomb. Match or swap a bomb to detonate it. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
+      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a line or a same-colour 2×2 square creates a gift box; five in a line creates a rainbow colour bomb; a T/L match creates a wrapped candy. Gift boxes blast a 3×3 area and award free coins. Match or swap a special candy to trigger it. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
         { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
