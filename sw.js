@@ -1,12 +1,12 @@
 'use strict';
 
-const CACHE_NAME = 'jewel-match-v25';
+const CACHE_NAME = 'jewel-match-v26';
 const APP_SHELL = [
   './',
   './index.html',
   './css/style.css',
   './js/game.js',
-  './media/jewel-match-gameplay.mp4',
+  './media/jewel-match-gameplay-4k.mp4',
   './favicon.svg',
   './manifest.webmanifest'
 ];
