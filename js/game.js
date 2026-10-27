@@ -47,7 +47,57 @@
   let runBestAtStart = best;
   let personalBestCelebrated = false;
   let dailyStreak = readDailyStreak();
+  let reducedEffects = readSetting('jewel-match-reduced-effects', false);
+  let shapeAssist = readSetting('jewel-match-shape-assist', false);
   try { soundOn = localStorage.getItem('jewel-match-sound') !== 'off'; } catch (_) {}
+
+  function readSetting(key, fallback = false) { try { const v=localStorage.getItem(key); return v===null?fallback:v==='true'; } catch (_) { return fallback; } }
+  function saveSetting(key,value) { try { localStorage.setItem(key,String(Boolean(value))); } catch (_) {} }
+  function readAchievements() { try { return JSON.parse(localStorage.getItem('jewel-match-achievements')||'{}')||{}; } catch (_) { return {}; } }
+  function unlockAchievement(id,title,reward=0) {
+    const a=readAchievements(); if(a[id]) return false; a[id]={title,date:todayKey()};
+    try { localStorage.setItem('jewel-match-achievements',JSON.stringify(a)); } catch (_) {}
+    if(reward){crystalCoins+=reward;persistProgress();showToast('🏆 '+title+' unlocked! +'+reward+' coins');} else showToast('🏆 Achievement unlocked: '+title+'!');
+    return true;
+  }
+  function checkAchievements() {
+    if(gamesWon>=1) unlockAchievement('first-win','First Sparkle',10);
+    if(gamesWon>=5) unlockAchievement('five-wins','Crystal Champion',25);
+    if(gamesWon>=25) unlockAchievement('twenty-five-wins','Sugar Superstar',75);
+    if(bestChain>=3) unlockAchievement('cascade-three','Cascade Crafter',15);
+    if(bestChain>=6) unlockAchievement('cascade-six','Chain Reaction Master',40);
+    if(dailyStreak>=3) unlockAchievement('streak-three','Daily Sweet Tooth',30);
+    if(dailyStreak>=7) unlockAchievement('streak-seven','Week of Wonder',100);
+    if(Object.keys(levelStars).length>=10) unlockAchievement('ten-levels','Trailblazer',60);
+    if(Object.values(levelStars).some((x)=>Number(x)>=3)) unlockAchievement('three-stars','Perfect Shine',20);
+  }
+  function showAchievements() {
+    const a=readAchievements(), e=[['first-win','First Sparkle','Win your first round',10],['five-wins','Crystal Champion','Win 5 rounds',25],['twenty-five-wins','Sugar Superstar','Win 25 rounds',75],['cascade-three','Cascade Crafter','Reach a 3+ chain',15],['cascade-six','Chain Reaction Master','Reach a 6+ chain',40],['streak-three','Daily Sweet Tooth','Build a 3-day daily streak',30],['streak-seven','Week of Wonder','Build a 7-day daily streak',100],['ten-levels','Trailblazer','Earn stars on 10 levels',60],['three-stars','Perfect Shine','Earn three stars on a level',20]];
+    const n=e.filter(([id])=>a[id]).length, textLines=e.map(([id,t,d,r])=>(a[id]?'🏆 ':'🔒 ')+t+' — '+d+(a[id]?' ✓':' · +'+r+' coins')).join(' • ');
+    showModal({symbol:'🏆',eyebrow:'YOUR COLLECTION BOOK',title:'Achievements '+n+'/'+e.length,copy:textLines+' • Wins: '+gamesWon+' • Best chain: '+bestChain+' • Daily streak: '+dailyStreak,actions:[{label:'Close collection',run:hideModal}]});
+  }
+  function exportSave() {
+    const keys=['jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist'];
+    const data={app:'Jewel Match',format:1,exportedAt:new Date().toISOString(),progress:{}};
+    keys.forEach((key)=>{try{const v=localStorage.getItem(key);if(v!==null)data.progress[key]=v;}catch(_){}});
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})), link=document.createElement('a');
+    link.href=url;link.download='jewel-match-save.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Save backup exported.');
+  }
+  function importSave() {
+    const raw=window.prompt('Paste the contents of your Jewel Match save JSON backup. Import replaces matching progress keys on this browser.');
+    if(!raw)return;
+    try { const d=JSON.parse(raw); if(!d||d.app!=='Jewel Match'||d.format!==1||!d.progress||typeof d.progress!=='object'||Array.isArray(d.progress))throw Error('invalid');
+      const allowed=new Set(['jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist']);
+      Object.entries(d.progress).forEach(([k,v])=>{if(allowed.has(k)&&typeof v==='string')localStorage.setItem(k,v);});window.location.reload();
+    } catch (_) {showToast('Import failed: invalid Jewel Match backup.');}
+  }
+  function showSaveTools() { showModal({symbol:'💾',eyebrow:'YOUR PROGRESS, YOUR DEVICE',title:'Save tools',copy:'Export a JSON backup or import a backup by pasting its contents. Progress stays on this device; there is no account or database. Import replaces matching local progress keys.',actions:[{label:'Export save JSON',run:exportSave},{label:'Import save JSON',run:importSave},{label:'Close',run:hideModal}]}); }
+  function showGameSettings() {
+    showModal({symbol:'⚙',eyebrow:'MAKE IT YOURS',title:'Game settings',copy:'Visual effects: '+(reducedEffects?'reduced':'full')+'. Shape assist: '+(shapeAssist?'on':'off')+'. Shape markers help distinguish gems without relying only on colour.',actions:[
+      {label:reducedEffects?'Enable full effects':'Reduce animations',run:()=>{reducedEffects=!reducedEffects;saveSetting('jewel-match-reduced-effects',reducedEffects);document.body.classList.toggle('reduced-effects',reducedEffects);showGameSettings();}},
+      {label:shapeAssist?'Turn shape assist off':'Turn shape assist on',run:()=>{shapeAssist=!shapeAssist;saveSetting('jewel-match-shape-assist',shapeAssist);renderBoard();showGameSettings();}},
+      {label:'Close settings',run:hideModal}]});
+  }
 
   function readNumber(key, fallback = 0) {
     try { return Math.max(0, Number(localStorage.getItem(key)) || fallback); } catch (_) { return fallback; }
@@ -68,7 +118,8 @@
       actions.push({ label: 'Level ' + level + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '· · ·'), run: () => startGame('adventure', level) });
     }
     actions.push({ label: 'Close map', run: hideModal });
-    showModal({ symbol: '🍬', eyebrow: 'SUGAR TRAIL', title: 'Choose a level', copy: 'All 100 levels are free to play. Pick any level, retry without limits, and earn up to three stars. No ads, purchases, or paywalls.', actions });
+    const worlds=['🍓 Berry Grove','🍋 Lemon Lagoon','🍇 Grape Galaxy','🍊 Citrus Canyon','🍭 Candy Castle','💎 Crystal Caves','🍰 Sugar Summit','🌈 Rainbow Ridge','🍬 Sweetwood','👑 Royal Confection'];
+    showModal({symbol:'🍬',eyebrow:'SUGAR TRAIL · 10 WORLDS',title:'Choose a level',copy:'Worlds: '+worlds.join(' · ')+'. Every 10th level is a free boss challenge with a bigger reward. All levels are open to everyone.',actions});
   }
 
   function dailyGiftClaimedToday() {
@@ -202,6 +253,7 @@
         }
         gem.setAttribute('aria-hidden', 'true');
         tile.appendChild(gem);
+        if (shapeAssist) { const shape=document.createElement('span'); shape.className='shape-assist'; shape.textContent=({ruby:'●',sapphire:'◆',emerald:'▲',amethyst:'■',topaz:'★',diamond:'✚'})[type]||'•'; shape.setAttribute('aria-hidden','true'); tile.appendChild(shape); }
         if (ice[row]?.[col]) {
           const frost = document.createElement('span');
           frost.className = 'ice-overlay';
@@ -623,8 +675,10 @@
       if (tile) tile.classList.add(triggeredBombs.size ? 'bomb-slowmo' : 'matching');
     });
     const powerBonus = (specialPosition?.power === 'color' || runs.some((run) => run.length >= 5) ? 500 : runs.length ? 250 : 0) + Math.max(0, triggeredBombs.size - 1) * 150 + (forcedBombs.length > 1 ? 500 : 0);
-    score += clearCoords.length * 60 * (chain + 1) + powerBonus;
-    if (chain > bestChain) { bestChain = chain; persistProgress(); }
+    const comboMultiplier=Math.min(5,chain+1);
+    score += Math.round(clearCoords.length * 60 * comboMultiplier) + powerBonus;
+    if (chain > bestChain) { bestChain = chain; persistProgress(); checkAchievements(); }
+    if (chain >= 2) message.textContent='SWEET COMBO ×'+comboMultiplier+' · CASCADE BONUS';
     if (forcedBombs.length > 1) showToast('MEGA COMBO! +500 bonus');
     else if (chain >= 2) showToast(chain >= 3 ? 'UNSTOPPABLE CASCADE!' : 'AMAZING CASCADE!');
     if (score > best) {
@@ -711,7 +765,10 @@
     if (score >= currentTarget && objectiveComplete) {
       recordDailyWin();
       gamesWon++;
-      const reward = currentMode === 'daily' ? 75 : currentMode === 'adventure' ? 40 + currentLevel * 5 : 20;
+      const moveBonus=moves*100;
+      const chestBonus=gamesWon%5===0||(currentMode==='adventure'&&currentLevel%10===0)?50:0;
+      score+=moveBonus;
+      const reward=(currentMode==='daily'?75:currentMode==='adventure'?40+currentLevel*5:20)+moves*5+chestBonus;
       crystalCoins += reward;
       if (currentMode === 'adventure') {
         const stars = score >= currentTarget * 1.8 ? 3 : score >= currentTarget * 1.35 ? 2 : 1;
@@ -720,13 +777,13 @@
         adventureLevel = Math.max(adventureLevel, currentLevel + 1);
       }
       persistProgress();
-      if (gamesWon === 1) showToast('Achievement unlocked: First Victory!');
-      else if (gamesWon === 5) showToast('Achievement unlocked: Crystal Champion!');
-      else showToast('+' + reward + ' crystal coins earned!');
+      checkAchievements();
+      if(chestBonus) showToast('🧰 TREASURE CHEST! +'+chestBonus+' bonus coins!');
+      else showToast('+'+reward+' coins · +'+moveBonus.toLocaleString()+' unused-move bonus!');
       showModal({
         eyebrow: currentMode === 'daily' ? 'DAILY CHALLENGE COMPLETE' : currentMode === 'adventure' ? 'LEVEL COMPLETE · LEVEL ' + currentLevel : 'CRYSTAL QUEST COMPLETE',
         symbol: '✧', title: 'You sparkle!',
-        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins. ' + (currentMode === 'adventure' ? 'Stars earned: ' + '★'.repeat(Number(levelStars[currentLevel]) || 1) + '☆'.repeat(3 - (Number(levelStars[currentLevel]) || 1)) + '. Next up: Level ' + adventureLevel + '. ' : currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
+        copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins including +' + (moves*5) + ' for unused moves' + (chestBonus?' and a treasure chest bonus of '+chestBonus+' coins':'') + '. ' + (currentMode === 'adventure' ? 'Stars earned: ' + '★'.repeat(Number(levelStars[currentLevel]) || 1) + '☆'.repeat(3 - (Number(levelStars[currentLevel]) || 1)) + '. Next up: Level ' + adventureLevel + '. ' : currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
         actions: [
           { label: currentMode === 'adventure' ? 'Next level' : 'Play again', run: () => startGame(currentMode) },
           { label: 'Back to home', run: goHome }
@@ -904,6 +961,9 @@
     playTone(620, .12, 'triangle');
   });
   $('#how-button').addEventListener('click', showHowToPlay);
+  $('#achievements-button')?.addEventListener('click',showAchievements);
+  $('#save-tools-button')?.addEventListener('click',showSaveTools);
+  $('#settings-button')?.addEventListener('click',showGameSettings);
   $('#sound-toggle').addEventListener('click', () => {
     soundOn = !soundOn;
     try { localStorage.setItem('jewel-match-sound', soundOn ? 'on' : 'off'); } catch (_) {}
@@ -1047,7 +1107,9 @@
     });
   }
 
+  document.body.classList.toggle('reduced-effects',reducedEffects);
   saveBest();
   persistProgress();
   updateDailyGiftButton();
+  checkAchievements();
 })();
