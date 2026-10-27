@@ -8,6 +8,16 @@
   let currentTarget = CLASSIC_TARGET;
   let currentMoves = CLASSIC_MOVES;
   let currentMode = 'classic';
+  const DIFFICULTIES = {
+    easy: { label: 'Easy', target: 0.72, moves: 8, ice: 0.72 },
+    normal: { label: 'Normal', target: 1, moves: 0, ice: 1 },
+    hard: { label: 'Hard', target: 1.4, moves: -4, ice: 1.35 },
+    expert: { label: 'Expert', target: 1.85, moves: -8, ice: 1.75 }
+  };
+  let currentDifficulty = readDifficulty();
+  function readDifficulty() { try { const value=localStorage.getItem('jewel-match-difficulty'); return value && ['easy','normal','hard','expert'].includes(value) ? value : 'normal'; } catch (_) { return 'normal'; } }
+  function difficultySettings() { return DIFFICULTIES[currentDifficulty] || DIFFICULTIES.normal; }
+  function updateDifficultyButton() { const button=$('#difficulty-button'); if(button) button.textContent='🎚 Difficulty: '+difficultySettings().label; }
   let adventureLevel = readNumber('jewel-match-level', 1);
   let crystalCoins = readNumber('jewel-match-coins', 0);
   let gamesWon = readNumber('jewel-match-wins', 0);
@@ -77,7 +87,7 @@
     showModal({symbol:'🏆',eyebrow:'YOUR COLLECTION BOOK',title:'Achievements '+n+'/'+e.length,copy:textLines+' • Wins: '+gamesWon+' • Best chain: '+bestChain+' • Daily streak: '+dailyStreak,actions:[{label:'Close collection',run:hideModal}]});
   }
   function exportSave() {
-    const keys=['jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist'];
+    const keys=['jewel-match-difficulty','jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist'];
     const data={app:'Jewel Match',format:1,exportedAt:new Date().toISOString(),progress:{}};
     keys.forEach((key)=>{try{const v=localStorage.getItem(key);if(v!==null)data.progress[key]=v;}catch(_){}});
     try { for (let i=0;i<localStorage.length;i++) { const key=localStorage.key(i); if (key && key.startsWith('jewel-match-daily-best-')) data.progress[key]=localStorage.getItem(key); } } catch (_) {}
@@ -88,7 +98,7 @@
     const raw=window.prompt('Paste the contents of your Jewel Match save JSON backup. Import replaces matching progress keys on this browser.');
     if(!raw)return;
     try { const d=JSON.parse(raw); if(!d||d.app!=='Jewel Match'||d.format!==1||!d.progress||typeof d.progress!=='object'||Array.isArray(d.progress))throw Error('invalid');
-      const allowed=new Set(['jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist']);
+      const allowed=new Set(['jewel-match-difficulty','jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist']);
       Object.entries(d.progress).forEach(([k,v])=>{if((allowed.has(k)||/^jewel-match-daily-best-\d{4}-\d{2}-\d{2}$/.test(k))&&typeof v==='string')localStorage.setItem(k,v);});window.location.reload();
     } catch (_) {showToast('Import failed: invalid Jewel Match backup.');}
   }
@@ -123,13 +133,15 @@
     ];
     for (let level = 1; level <= 100; level++) {
       const stars = Number(levelStars[level]) || 0;
-      const world = worlds[Math.floor((level - 1) / 10)];
+      const world = worlds[Math.floor((level - 1) / 10) % worlds.length];
       const boss = level % 10 === 0;
       const label = boss ? '👑 BOSS ' + level : world.icon + ' ' + level;
       actions.push({ label: label + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '· · ·'), run: () => startGame('adventure', level) });
     }
+    actions.unshift({ label: '∞ Choose any level', run: () => { const raw=window.prompt('Choose any Sugar Trail level number. Levels continue forever.', String(adventureLevel)); if(raw===null)return; const level=Number(raw.trim()); if(!Number.isSafeInteger(level)||level<1){showToast('Enter a whole level number greater than zero.');return;} startGame('adventure',level); } });
+    actions.unshift({ label: '▶ Continue · Level '+adventureLevel+' · '+difficultySettings().label, run: () => startGame('adventure') });
     actions.push({ label: 'Close map', run: hideModal });
-    showModal({symbol:'🗺',eyebrow:'SUGAR TRAIL · 10 WORLDS',title:'Choose a level',copy:worlds.map((world,index)=>((index+1)+'. '+world.name)).join('  •  ')+'. Every 10th level is a boss challenge with frozen tiles and a 100-coin chest. All 100 levels are free and open to everyone.',actions});
+    showModal({symbol:'🗺',eyebrow:'SUGAR TRAIL · INFINITE WORLDS',title:'Choose a level',copy:worlds.map((world,index)=>((index+1)+'. '+world.name)).join('  •  ')+'. Worlds repeat with tougher goals forever. Every 10th level is a boss challenge with frozen tiles and a 100-coin chest. Choose any level number, with no final level.',actions});
   }
 
   function dailyGiftClaimedToday() {
@@ -381,9 +393,14 @@
     saveBest();
   }
 
+  function showDifficultyPicker() {
+    const options=Object.entries(DIFFICULTIES);
+    showModal({symbol:'🎚',eyebrow:'SUGAR TRAIL SETTINGS',title:'Choose difficulty',copy:'Difficulty changes score targets, available moves, and frozen-tile objectives. Your choice is saved on this device and applies to every infinite Sugar Trail level.',actions:options.map(([id,config])=>({label:(currentDifficulty===id?'✓ ':'')+config.label,run:()=>{currentDifficulty=id;try{localStorage.setItem('jewel-match-difficulty',id);}catch(_){}updateDifficultyButton();showModal({symbol:'🍬',eyebrow:'DIFFICULTY SAVED',title:config.label+' mode',copy:'Sugar Trail difficulty is now '+config.label+'. Your progress and selected difficulty are saved locally.',actions:[{label:'Play Sugar Trail',run:()=>startGame('adventure')},{label:'Choose a level',run:showLevelMap},{label:'Close',run:hideModal}]});}})).concat([{label:'Back to home',run:hideModal}])});
+  }
+
   function startGame(mode = currentMode, requestedLevel = null) {
     currentMode = mode;
-    if (mode === 'adventure' && Number.isInteger(requestedLevel) && requestedLevel > 0) currentLevel = Math.min(100, Math.max(1, requestedLevel));
+    if (mode === 'adventure' && Number.isSafeInteger(requestedLevel) && requestedLevel > 0) currentLevel = requestedLevel;
     else if (mode === 'adventure') currentLevel = adventureLevel;
     if (currentMode === 'daily') {
       const today = new Date();
@@ -391,10 +408,12 @@
       currentTarget = 1800 + (dayKey % 8) * 100;
       currentMoves = 20;
     } else if (currentMode === 'adventure') {
-      currentTarget = 900 + currentLevel * 220;
-      currentMoves = Math.max(17, 28 - Math.floor(currentLevel / 3));
+      const difficulty=difficultySettings();
+      currentTarget = Math.round((900 + currentLevel * 220) * difficulty.target);
+      currentMoves = Math.max(10, 28 - Math.floor(Math.log2(currentLevel + 1) * 1.6) + difficulty.moves);
       levelGoal = currentLevel % 10 === 0 ? 'ice' : currentLevel % 3 === 0 ? 'ice' : currentLevel % 4 === 0 ? 'collect' : 'score';
-      goalTarget = levelGoal === 'ice' ? Math.min(12, 2 + Math.floor(currentLevel / 2)) : levelGoal === 'collect' ? 12 + currentLevel : currentTarget;
+      const baseIce=Math.min(24,2+Math.floor(Math.log2(currentLevel+1)*2));
+      goalTarget = levelGoal === 'ice' ? Math.min(36,Math.max(2,Math.round(baseIce*difficulty.ice))) : levelGoal === 'collect' ? 12 + currentLevel : currentTarget;
       goalProgress = 0;
     } else {
       currentTarget = CLASSIC_TARGET;
@@ -418,7 +437,7 @@
     board = createBoard();
     ice = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
     if (currentMode === 'adventure' && (levelGoal === 'ice' || currentLevel >= 3)) {
-      const iceCount = levelGoal === 'ice' ? goalTarget : Math.min(12, 2 + Math.floor(currentLevel / 2));
+      const iceCount = levelGoal === 'ice' ? goalTarget : Math.min(24, 2 + Math.floor(Math.log2(currentLevel + 1) * 2));
       let placed = 0, attempts = 0;
       while (placed < iceCount && attempts++ < 100) {
         const row = Math.floor(Math.random() * SIZE), col = Math.floor(Math.random() * SIZE);
@@ -991,6 +1010,7 @@
   $('#achievements-button')?.addEventListener('click',showAchievements);
   $('#save-tools-button')?.addEventListener('click',showSaveTools);
   $('#settings-button')?.addEventListener('click',showGameSettings);
+  $('#difficulty-button')?.addEventListener('click',showDifficultyPicker);
   $('#sound-toggle').addEventListener('click', () => {
     soundOn = !soundOn;
     try { localStorage.setItem('jewel-match-sound', soundOn ? 'on' : 'off'); } catch (_) {}
@@ -1138,5 +1158,6 @@
   saveBest();
   persistProgress();
   updateDailyGiftButton();
+  updateDifficultyButton();
   checkAchievements();
 })();
