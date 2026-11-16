@@ -759,11 +759,10 @@
         for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
         message.textContent = 'STRIPED CANDY! The whole column clears!';
       } else if (power === 'wrapped') {
-        for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++)
-          for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) cleared.add(row + ',' + col);
-        // Mark the second pulse separately for the dramatic two-stage wrapped-candy effect.
-        for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++)
-          for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) cleared.add(row + ',' + col);
+        // The two 3×3 shockwaves are represented by their combined 5×5 footprint
+        // in this single-collapse board engine.
+        for (let row = Math.max(0, bomb.row - 2); row <= Math.min(SIZE - 1, bomb.row + 2); row++)
+          for (let col = Math.max(0, bomb.col - 2); col <= Math.min(SIZE - 1, bomb.col + 2); col++) cleared.add(row + ',' + col);
         message.textContent = 'WRAPPED CANDY! DOUBLE EXPLOSION!';
       } else if (power === 'fish') {
         const candidates = [];
