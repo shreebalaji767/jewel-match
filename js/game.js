@@ -115,7 +115,7 @@
     const raw=window.prompt('Paste the contents of your Jewel Match save JSON backup. Import replaces matching progress keys on this browser.');
     if(!raw)return;
     try { const d=JSON.parse(raw); if(!d||d.app!=='Jewel Match'||d.format!==1||!d.progress||typeof d.progress!=='object'||Array.isArray(d.progress))throw Error('invalid');
-      const allowed=new Set(['jewel-match-difficulty','jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist']);
+      const allowed=new Set(['jewel-match-difficulty','jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist','jewel-match-lives','jewel-match-next-life']);
       Object.entries(d.progress).forEach(([k,v])=>{if((allowed.has(k)||/^jewel-match-daily-best-\d{4}-\d{2}-\d{2}$/.test(k))&&typeof v==='string')localStorage.setItem(k,v);});window.location.reload();
     } catch (_) {showToast('Import failed: invalid Jewel Match backup.');}
   }
