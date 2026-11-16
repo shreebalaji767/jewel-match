@@ -902,7 +902,7 @@
       const power = gemPower(board[point.row][point.col]);
       return { ...point, targetType: (power === 'color' || power === 'coloring') && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null,
         partnerPower: power === 'color' ? gemPower(board[other.row][other.col]) : null,
-        direction: first.row === second.row ? (second.col > first.col ? 'right' : 'left') : (second.row > first.row ? 'down' : 'up') };
+        direction: point.row === other.row ? (other.col > point.col ? 'right' : 'left') : (other.row > point.row ? 'down' : 'up') };
     });
     if (!matches.length && !swappedBombs.length) {
       await sleep(150);
