@@ -729,7 +729,16 @@
     if (specialPosition) {
       cleared.delete(specialPosition.row + ',' + specialPosition.col);
       board[specialPosition.row][specialPosition.col] = specialPosition.type + '|' + specialPosition.power;
-      showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : specialPosition.power === 'gift' ? '🎁 Candy gift box created! Match or blast it for a 3×3 explosion + free coins!' : '✦ Special candy created!');
+      if (specialPosition.power === 'row' || specialPosition.power === 'column') {
+        // A straight four-jewel match creates a striped candy and awards coins.
+        const stripeReward = 10;
+        crystalCoins += stripeReward;
+        persistProgress();
+        message.textContent = 'FOUR-JEWEL MATCH! STRIPED CANDY CREATED · +' + stripeReward + ' COINS';
+        showToast('↔ Striped candy created! +' + stripeReward + ' coins!');
+      } else {
+        showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : specialPosition.power === 'gift' ? '🎁 Candy gift box created! Match or blast it for a 3×3 explosion + free coins!' : '✦ Wrapped candy created!');
+      }
     }
     const clearCoords = [...cleared].map((key) => key.split(',').map(Number));
     clearCoords.forEach(([row, col]) => {
