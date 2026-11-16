@@ -274,13 +274,13 @@
         tile.setAttribute('role', 'gridcell');
         const type = gemType(board[row][col]);
         const power = gemPower(board[row][col]);
-        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'gift' ? 'bonus candy' : power === 'wrapped' ? 'wrapped candy' : power === 'row' ? 'striped candy, horizontal' : power === 'column' ? 'striped candy, vertical' : 'special candy') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
+        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'gift' ? 'bonus bomb, 3 by 3 blast' : power === 'wrapped' ? 'wrapped candy' : power === 'row' ? 'striped candy, horizontal' : power === 'column' ? 'striped candy, vertical' : 'special candy') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
         const gem = document.createElement('span');
         gem.className = 'gem ' + type + (power ? ' special-gem bomb-' + power : '');
         if (power) {
           const mark = document.createElement('span');
           mark.className = 'bomb-mark';
-          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'gift' ? '🎁' : power === 'row' ? '↔' : '↕';
+          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'gift' ? '💣' : power === 'row' ? '↔' : '↕';
           mark.setAttribute('aria-hidden', 'true');
           tile.appendChild(mark);
         }
@@ -632,16 +632,19 @@
         break;
       }
     }
-    // A straight five-match creates a colour bomb; four creates a directional striped candy.
+    // Four in a straight line creates a stored bonus bomb; five creates a colour bomb.
     if (!specialPosition) {
       const longRun = runs.find((run) => run.length >= 5);
       const fourRun = runs.find((run) => run.length === 4);
       const run = longRun || fourRun;
       if (run) {
         const offset = Math.floor(run.length / 2);
-        specialPosition = run.length >= 5
-          ? { row: run.direction === 'row' ? run.row : run.row + offset, col: run.direction === 'row' ? run.col + offset : run.col, power: 'color', type: run.type }
-          : { row: run.direction === 'row' ? run.row : run.row + offset, col: run.direction === 'row' ? run.col + offset : run.col, power: run.direction, type: run.type };
+        specialPosition = {
+          row: run.direction === 'row' ? run.row : run.row + offset,
+          col: run.direction === 'row' ? run.col + offset : run.col,
+          power: run.length >= 5 ? 'color' : 'gift',
+          type: run.type
+        };
       }
     }
 
@@ -729,15 +732,15 @@
     if (specialPosition) {
       cleared.delete(specialPosition.row + ',' + specialPosition.col);
       board[specialPosition.row][specialPosition.col] = specialPosition.type + '|' + specialPosition.power;
-      if (specialPosition.power === 'row' || specialPosition.power === 'column') {
-        // A straight four-jewel match creates a striped candy and awards coins.
-        const stripeReward = 10;
-        crystalCoins += stripeReward;
+      if (specialPosition.power === 'gift') {
+        // Keep the bomb on the board for a later move, and reward the four-match.
+        const bombReward = 10;
+        crystalCoins += bombReward;
         persistProgress();
-        message.textContent = 'FOUR-JEWEL MATCH! STRIPED CANDY CREATED · +' + stripeReward + ' COINS';
-        showToast('↔ Striped candy created! +' + stripeReward + ' coins!');
+        message.textContent = 'FOUR-JEWEL MATCH! BONUS BOMB SAVED · +' + bombReward + ' COINS';
+        showToast('💣 Bonus bomb created! Use it in a later match · +' + bombReward + ' coins');
       } else {
-        showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : specialPosition.power === 'gift' ? '🎁 Candy gift box created! Match or blast it for a 3×3 explosion + free coins!' : '✦ Wrapped candy created!');
+        showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : '✦ Wrapped candy created!');
       }
     }
     const clearCoords = [...cleared].map((key) => key.split(',').map(Number));
@@ -1067,7 +1070,7 @@
   function showHowToPlay() {
     showModal({
       symbol: '✧', eyebrow: 'YOUR CRYSTAL GUIDE', title: 'How to play',
-      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a line creates a striped candy that clears a full row or column; five in a straight line creates a colour bomb; a T/L match creates a wrapped candy with a larger blast. Match or swap a special candy to trigger it. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
+      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a line creates a bonus bomb that stays on the board until you match it later; it blasts a 3×3 area and awards free coins. Five in a straight line creates a colour bomb; a T/L match creates a wrapped candy with a larger blast. Match a special candy to activate it. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
         { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
