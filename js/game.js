@@ -424,25 +424,34 @@
     } else if (currentMode === 'adventure') {
       const difficulty = difficultySettings();
       const challenge = levelChallenge(currentLevel);
-      currentTarget = Math.round((900 + currentLevel * 220) * difficulty.target * challenge.target);
-      currentMoves = Math.max(10, 28 - Math.floor(Math.log2(currentLevel + 1) * 1.6) + difficulty.moves + challenge.moves);
-      levelGoal = currentLevel % 10 === 0 ? 'ice' : currentLevel % 3 === 0 ? 'ice' : currentLevel % 4 === 0 ? 'collect' : 'score';
-      const baseIce = Math.min(30, 2 + Math.floor(Math.log2(currentLevel + 1) * 2) + challenge.ice);
+      const bossLevel = currentLevel % 10 === 0;
+      const hardLevel = currentLevel % 5 === 0;
+      // Candy Trail's difficulty curve: the board stays readable, but every
+      // world tightens the move budget and adds a more demanding objective.
+      const hardMovePenalty = bossLevel ? 3 : hardLevel ? 2 : 0;
+      currentTarget = Math.round((1050 + currentLevel * 95) * difficulty.target * challenge.target);
+      currentMoves = Math.max(10, 27 - Math.floor(Math.log2(currentLevel + 1) * 1.7) -
+        Math.floor(currentLevel / 12) + difficulty.moves + challenge.moves - hardMovePenalty);
+      levelGoal = bossLevel ? 'ice' : hardLevel ? 'collect' : currentLevel % 3 === 0 ? 'ice' : currentLevel % 4 === 0 ? 'collect' : 'score';
+      const baseIce = Math.min(34, 2 + Math.floor(Math.log2(currentLevel + 1) * 2) +
+        challenge.ice + (hardLevel ? 4 : 0) + (bossLevel ? 3 : 0));
       goalTarget = levelGoal === 'ice'
-        ? Math.min(36, Math.max(2, Math.round(baseIce * difficulty.ice)))
+        ? Math.min(36, Math.max(3, Math.round(baseIce * difficulty.ice)))
         : levelGoal === 'collect'
-          ? Math.min(36, 12 + Math.floor(currentLevel * 0.45) + challenge.ice)
+          ? Math.min(36, 12 + Math.floor(currentLevel * 0.45) + challenge.ice + (hardLevel ? 4 : 0))
           : currentTarget;
       goalProgress = 0;
     } else {
       currentTarget = CLASSIC_TARGET;
       currentMoves = CLASSIC_MOVES;
     }
-    const challengeLabel = currentMode === 'adventure' ? levelChallenge(currentLevel).label.toUpperCase() : '';
+    const challengeLabel = currentMode === 'adventure'
+      ? levelChallenge(currentLevel).label.toUpperCase() + (currentLevel % 10 === 0 ? ' · SUPER HARD' : currentLevel % 5 === 0 ? ' · HARD' : '')
+      : '';
     $('#game-screen .centered-eyebrow').textContent = currentMode === 'daily'
       ? 'DAILY CRYSTAL CHALLENGE'
       : currentMode === 'adventure'
-        ? (currentLevel % 10 === 0 ? 'SUGAR TRAIL · BOSS LEVEL ' : 'SUGAR TRAIL · LEVEL ') + currentLevel + ' · ' + challengeLabel
+        ? (currentLevel % 10 === 0 ? 'SUGAR TRAIL · BOSS LEVEL ' : currentLevel % 5 === 0 ? 'SUGAR TRAIL · HARD LEVEL ' : 'SUGAR TRAIL · LEVEL ') + currentLevel + ' · ' + challengeLabel
         : 'CRYSTAL QUEST';
     gameRun++;
     runBestAtStart = best;
@@ -464,7 +473,8 @@
       const challenge = levelChallenge(currentLevel);
       const iceCount = levelGoal === 'ice'
         ? goalTarget
-        : Math.min(24, 2 + Math.floor(Math.log2(currentLevel + 1) * 2) + challenge.ice);
+        : Math.min(30, 2 + Math.floor(Math.log2(currentLevel + 1) * 2) + challenge.ice +
+          (currentLevel % 5 === 0 ? 4 : 0) + (currentLevel % 10 === 0 ? 3 : 0));
       let placed = 0, attempts = 0;
       while (placed < iceCount && attempts++ < 100) {
         const row = Math.floor(Math.random() * SIZE), col = Math.floor(Math.random() * SIZE);
@@ -477,10 +487,11 @@
     $('#sound-toggle').textContent = soundOn ? '♫' : '♪';
     message.textContent = currentMode === 'adventure'
       ? 'LEVEL ' + currentLevel + ' · ' + levelChallenge(currentLevel).label.toUpperCase() + ' — ' +
-        (currentLevel % 10 === 0 ? 'BOSS CHALLENGE! Break every frozen tile and beat the score target!'
-          : levelGoal === 'ice' ? 'Clear every frozen tile and reach the score target!'
-            : levelGoal === 'collect' ? 'Collect ' + goalTarget + ' candies of one colour and reach the score target!'
-              : 'Reach the score target before moves run out!')
+        (currentLevel % 10 === 0 ? 'SUPER HARD BOSS! Break every frozen tile and beat the score target!'
+          : currentLevel % 5 === 0 ? 'HARD LEVEL! Collect ' + goalTarget + ' candies of one colour, clear blockers, and reach the score target!'
+            : levelGoal === 'ice' ? 'Clear every frozen tile and reach the score target!'
+              : levelGoal === 'collect' ? 'Collect ' + goalTarget + ' candies of one colour and reach the score target!'
+                : 'Reach the score target before moves run out!')
       : 'Match 3 or more candies. Swap, cascade, and make special candies!';
     playTone(580, .1);
   }
