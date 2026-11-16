@@ -923,10 +923,10 @@ body{
 
 
 /* Distinct, readable silhouettes for every special candy. */
-.bomb-row .gem,.bomb-column .gem{outline:2px solid rgba(255,255,255,.78);outline-offset:-3px;filter:drop-shadow(0 0 7px rgba(255,255,255,.6))}
-.bomb-wrapped .gem{border-radius:28%;outline:3px dashed rgba(255,239,184,.95);outline-offset:-4px;box-shadow:0 0 13px rgba(255,190,104,.65),var(--crystal-shadow)}
-.bomb-color .gem{border-radius:50%;background:conic-gradient(#ff5f8f,#ffdb70,#7cf0b7,#76c9ff,#bd91ff,#ff5f8f);box-shadow:0 0 15px rgba(220,205,255,.9),inset 0 0 9px rgba(255,255,255,.8)}
-.bomb-fish .gem{border-radius:50% 50% 45% 45%;background:linear-gradient(145deg,#fff0b8,#ff9c79 52%,#a95dd2);box-shadow:0 0 13px rgba(255,190,140,.8),var(--crystal-shadow)}
-.bomb-coconut .gem{border-radius:42%;background:radial-gradient(circle at 35% 28%,#ffe4a8,#a76b43 48%,#51301f 82%);box-shadow:0 0 15px rgba(224,171,111,.8),var(--crystal-shadow)}
-.bomb-coloring .gem{border-radius:30%;background:conic-gradient(#ff6d9b,#ffd36d,#6ce7ad,#72c7ff,#bd8bff,#ff6d9b);box-shadow:0 0 17px rgba(255,255,255,.7),inset 0 0 8px rgba(255,255,255,.85)}
+.gem.bomb-row,.gem.bomb-column{outline:2px solid rgba(255,255,255,.78);outline-offset:-3px;filter:drop-shadow(0 0 7px rgba(255,255,255,.6))}
+.gem.bomb-wrapped{border-radius:28%;outline:3px dashed rgba(255,239,184,.95);outline-offset:-4px;box-shadow:0 0 13px rgba(255,190,104,.65),var(--crystal-shadow)}
+.gem.bomb-color{border-radius:50%;background:conic-gradient(#ff5f8f,#ffdb70,#7cf0b7,#76c9ff,#bd91ff,#ff5f8f);box-shadow:0 0 15px rgba(220,205,255,.9),inset 0 0 9px rgba(255,255,255,.8)}
+.gem.bomb-fish{border-radius:50% 50% 45% 45%;background:linear-gradient(145deg,#fff0b8,#ff9c79 52%,#a95dd2);box-shadow:0 0 13px rgba(255,190,140,.8),var(--crystal-shadow)}
+.gem.bomb-coconut{border-radius:42%;background:radial-gradient(circle at 35% 28%,#ffe4a8,#a76b43 48%,#51301f 82%);box-shadow:0 0 15px rgba(224,171,111,.8),var(--crystal-shadow)}
+.gem.bomb-coloring{border-radius:30%;background:conic-gradient(#ff6d9b,#ffd36d,#6ce7ad,#72c7ff,#bd8bff,#ff6d9b);box-shadow:0 0 17px rgba(255,255,255,.7),inset 0 0 8px rgba(255,255,255,.85)}
 .bomb-mark{z-index:3;filter:drop-shadow(0 1px 3px rgba(0,0,0,.85));text-shadow:0 1px 5px rgba(0,0,0,.8)}
