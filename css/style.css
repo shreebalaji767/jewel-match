@@ -930,3 +930,9 @@ body{
 .gem.bomb-coconut{border-radius:42%;background:radial-gradient(circle at 35% 28%,#ffe4a8,#a76b43 48%,#51301f 82%);box-shadow:0 0 15px rgba(224,171,111,.8),var(--crystal-shadow)}
 .gem.bomb-coloring{border-radius:30%;background:conic-gradient(#ff6d9b,#ffd36d,#6ce7ad,#72c7ff,#bd8bff,#ff6d9b);box-shadow:0 0 17px rgba(255,255,255,.7),inset 0 0 8px rgba(255,255,255,.85)}
 .bomb-mark{z-index:3;filter:drop-shadow(0 1px 3px rgba(0,0,0,.85));text-shadow:0 1px 5px rgba(0,0,0,.8)}
+
+
+/* Coconut Wheel: a brief rolling shimmer travels through its powered tiles. */
+.tile.coconut-roll .gem{animation:coconut-roll-glint .72s ease-in-out 2;filter:brightness(1.45) drop-shadow(0 0 10px rgba(255,190,112,.95))}
+@keyframes coconut-roll-glint{0%{transform:translateY(-1px) rotate(0) scale(1)}45%{transform:translateY(-4px) rotate(180deg) scale(1.13)}100%{transform:translateY(-1px) rotate(360deg) scale(1)}}
+@media(prefers-reduced-motion:reduce){.tile.coconut-roll .gem{animation:none}}
