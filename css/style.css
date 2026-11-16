@@ -706,3 +706,131 @@ h1{font-size:clamp(42px,5.4vw,76px);line-height:1.01;letter-spacing:clamp(-2.5px
   .game-board{gap:2px;padding:3px}
   .tile{border-radius:4px}
 }
+
+
+/* Elegant crystal depth: lightweight CSS 3D, no WebGL or external runtime. */
+:root{
+  --bg:#0b1020;
+  --panel:#151d32;
+  --muted:#a5b1c9;
+  --text:#f7f8ff;
+  --gold:#f5d79a;
+  --pink:#edb5d2;
+  --line:rgba(221,231,255,.14);
+}
+body{
+  background:
+    radial-gradient(ellipse at 18% 8%,rgba(99,119,190,.2),transparent 34%),
+    radial-gradient(ellipse at 86% 34%,rgba(169,105,177,.13),transparent 32%),
+    linear-gradient(145deg,#0b1020 0%,#11172a 52%,#0a1020 100%);
+}
+.ambient{opacity:.13;filter:blur(105px)}
+.topbar{border-bottom-color:rgba(221,231,255,.09)}
+.brand-logo{filter:drop-shadow(0 5px 12px rgba(181,158,255,.3))}
+.hero-art{perspective:1100px}
+.gameplay-preview{
+  overflow:hidden;
+  border:1px solid rgba(225,231,255,.16);
+  border-radius:28px;
+  background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.015) 42%),#121a30;
+  box-shadow:0 34px 90px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.16);
+  transform:rotateY(-4deg) rotateX(2deg);
+  transform-style:preserve-3d;
+}
+.gameplay-preview:after{
+  content:"";
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,.13),transparent 24% 72%,rgba(183,160,255,.08));
+}
+.gameplay-video{filter:saturate(.9) contrast(1.04)}
+.video-overlay{
+  text-shadow:0 2px 16px rgba(0,0,0,.8);
+  background:linear-gradient(0deg,rgba(8,12,25,.88),transparent 85%);
+}
+.primary-button{
+  background:linear-gradient(115deg,#fff0c5 0%,#f1c9d9 52%,#d7c8ff 100%);
+  box-shadow:0 12px 34px rgba(209,174,220,.2),inset 0 1px rgba(255,255,255,.8);
+}
+.primary-button:hover{box-shadow:0 16px 42px rgba(209,174,220,.3),inset 0 1px rgba(255,255,255,.8)}
+.daily-button,.daily-gift-button,.score-card,.secondary-button{
+  border-color:rgba(221,231,255,.13);
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.018));
+  box-shadow:inset 0 1px rgba(255,255,255,.055);
+}
+.board-frame{
+  padding:10px;
+  border:1px solid rgba(225,231,255,.2);
+  border-radius:21px;
+  background:linear-gradient(145deg,#39445e 0%,#202b43 34%,#111a2e 72%,#46506b 100%);
+  box-shadow:0 24px 65px rgba(0,0,0,.48),inset 0 2px 2px rgba(255,255,255,.2),inset 0 -5px 12px rgba(0,0,0,.3);
+}
+.game-board{
+  gap:5px;
+  padding:6px;
+  border:1px solid rgba(220,232,255,.1);
+  border-radius:13px;
+  background:linear-gradient(145deg,#0b1223,#151d32 58%,#0a1120);
+  box-shadow:inset 0 5px 18px rgba(0,0,0,.48),0 1px rgba(255,255,255,.08);
+}
+.tile{
+  overflow:hidden;
+  border:1px solid rgba(230,237,255,.12);
+  border-radius:8px;
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.018) 62%),#172139;
+  box-shadow:inset 0 1px rgba(255,255,255,.08),inset 0 -3px 6px rgba(0,0,0,.2),0 2px 4px rgba(0,0,0,.16);
+  transform:translateZ(0);
+}
+.tile:hover{background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.025)),#1d2943}
+.tile.selected{
+  border-color:#f5dfad;
+  background:linear-gradient(145deg,rgba(255,230,177,.24),rgba(208,181,255,.12)),#302d4b;
+  box-shadow:0 0 0 2px rgba(245,223,173,.25),0 0 22px rgba(232,199,255,.32),inset 0 1px rgba(255,255,255,.32);
+  transform:scale(.93) translateY(1px);
+}
+.tile .gem{
+  transform:translateY(-1px) scale(.94);
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.38)) drop-shadow(0 8px 7px rgba(0,0,0,.28));
+  transition:filter .16s,transform .16s;
+}
+.tile:hover .gem{transform:translateY(-2px) scale(.98);filter:drop-shadow(0 4px 3px rgba(0,0,0,.35)) drop-shadow(0 10px 9px rgba(0,0,0,.3))}
+.gem:before{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.78),transparent 24%),
+    linear-gradient(35deg,transparent 48%,rgba(255,255,255,.24) 49%,transparent 54%),
+    linear-gradient(135deg,rgba(255,255,255,.22),transparent 42%,rgba(0,0,0,.25) 100%);
+  mix-blend-mode:screen;
+}
+.gem:after{
+  top:8%;left:18%;width:25%;height:38%;
+  background:linear-gradient(155deg,rgba(255,255,255,.9),rgba(255,255,255,.08));
+  filter:blur(1px);
+  box-shadow:0 0 8px rgba(255,255,255,.24);
+}
+.ruby{background:linear-gradient(145deg,#ffd0d5 0%,#ff829b 18%,#e93668 48%,#9e164b 82%,#ff8da9 100%);box-shadow:inset 0 2px 4px rgba(255,255,255,.48),inset 0 -5px 8px rgba(91,0,32,.34)}
+.sapphire{background:linear-gradient(145deg,#e0f3ff 0%,#91c9ff 18%,#468bff 48%,#203c9b 82%,#83c4ff 100%);box-shadow:inset 0 2px 4px rgba(255,255,255,.5),inset 0 -5px 8px rgba(10,28,100,.38)}
+.emerald{background:linear-gradient(145deg,#dcffeb 0%,#8cf4c4 18%,#27bd8d 48%,#075d52 82%,#71edc0 100%);box-shadow:inset 0 2px 4px rgba(255,255,255,.48),inset 0 -5px 8px rgba(0,65,48,.38)}
+.amethyst{background:linear-gradient(145deg,#f8e5ff 0%,#d7aaff 18%,#a968f5 48%,#532a9b 82%,#d5a5ff 100%);box-shadow:inset 0 2px 4px rgba(255,255,255,.5),inset 0 -5px 8px rgba(49,12,93,.38)}
+.topaz{background:linear-gradient(145deg,#fff9d9 0%,#ffe49a 18%,#f6b84f 48%,#a9601d 82%,#ffdb83 100%);box-shadow:inset 0 2px 4px rgba(255,255,255,.5),inset 0 -5px 8px rgba(103,48,0,.36)}
+.diamond{background:linear-gradient(145deg,#fff 0%,#d6fbff 18%,#81d8e8 48%,#397cae 82%,#e5ffff 100%);box-shadow:inset 0 2px 4px rgba(255,255,255,.62),inset 0 -5px 8px rgba(17,65,99,.32)}
+.score-card strong{letter-spacing:-.6px}
+.progress-track{height:5px;background:rgba(255,255,255,.09)}
+.progress-fill{background:linear-gradient(90deg,#9bdcff,#c5adff,#ffe0a2);box-shadow:0 0 12px rgba(197,173,255,.38)}
+.modal{
+  border-color:rgba(225,231,255,.2);
+  background:linear-gradient(145deg,rgba(49,57,83,.98),rgba(18,25,44,.99));
+  box-shadow:0 34px 100px rgba(0,0,0,.62),inset 0 1px rgba(255,255,255,.12);
+}
+@media(max-width:700px){
+  .gameplay-preview{transform:none;border-radius:20px}
+  .board-frame{padding:6px}
+  .game-board{gap:3px;padding:4px}
+  .tile{border-radius:6px}
+}
+@media(max-width:420px){
+  .board-frame{padding:4px}
+  .game-board{gap:2px;padding:3px}
+  .tile{border-radius:4px}
+}
+@media(prefers-reduced-motion:reduce){
+  .gameplay-preview{transform:none}
+}
