@@ -274,13 +274,13 @@
         tile.setAttribute('role', 'gridcell');
         const type = gemType(board[row][col]);
         const power = gemPower(board[row][col]);
-        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'fish' ? 'candy fish, targets candies or blockers' : power === 'wrapped' ? 'wrapped candy, double explosion' : power === 'row' ? 'striped candy, clears a row' : power === 'column' ? 'striped candy, clears a column' : 'special candy') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
+        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'fish' ? 'candy fish, targets candies or blockers' : power === 'wrapped' ? 'wrapped candy, double explosion' : power === 'coconut' ? 'coconut wheel, powers up three candies' : power === 'coloring' ? 'coloring candy, recolours a whole colour' : power === 'row' ? 'striped candy, clears a row' : power === 'column' ? 'striped candy, clears a column' : 'special candy') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
         const gem = document.createElement('span');
         gem.className = 'gem ' + type + (power ? ' special-gem bomb-' + power : '');
         if (power) {
           const mark = document.createElement('span');
           mark.className = 'bomb-mark';
-          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'fish' ? '🐟' : power === 'row' ? '↔' : '↕';
+          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'fish' ? '🐟' : power === 'coconut' ? '🥥' : power === 'coloring' ? '🌈' : power === 'row' ? '↔' : '↕';
           mark.setAttribute('aria-hidden', 'true');
           tile.appendChild(mark);
         }
@@ -644,6 +644,16 @@
     }
     // A 2×2 square creates a fish; straight four creates striped; straight five creates colour.
     if (!specialPosition) {
+      let rectangle = null;
+      for (let row = 0; row < SIZE - 1 && !rectangle; row++) for (let col = 0; col < SIZE - 2; col++) {
+        const type = gemType(board[row][col]);
+        if (type && [[row,col+1],[row,col+2],[row+1,col],[row+1,col+1],[row+1,col+2]].every(([r,c]) => gemType(board[r][c]) === type)) {
+          rectangle = { row, col, type }; break;
+        }
+      }
+      if (rectangle) specialPosition = { row: rectangle.row, col: rectangle.col + 1, power: 'coconut', type: rectangle.type };
+    }
+    if (!specialPosition) {
       let square = null;
       for (let row = 0; row < SIZE - 1 && !square; row++) for (let col = 0; col < SIZE - 1; col++) {
         const type = gemType(board[row][col]);
@@ -662,7 +672,7 @@
         specialPosition = {
           row: run.direction === 'row' ? run.row : run.row + offset,
           col: run.direction === 'row' ? run.col + offset : run.col,
-          power: run.length >= 5 ? 'color' : run.direction,
+          power: run.length >= 6 ? 'coloring' : run.length >= 5 ? 'color' : run.direction,
           type: run.type
         };
       }
