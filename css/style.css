@@ -936,3 +936,9 @@ body{
 .tile.coconut-roll .gem{animation:coconut-roll-glint .72s ease-in-out 2;filter:brightness(1.45) drop-shadow(0 0 10px rgba(255,190,112,.95))}
 @keyframes coconut-roll-glint{0%{transform:translateY(-1px) rotate(0) scale(1)}45%{transform:translateY(-4px) rotate(180deg) scale(1.13)}100%{transform:translateY(-1px) rotate(360deg) scale(1)}}
 @media(prefers-reduced-motion:reduce){.tile.coconut-roll .gem{animation:none}}
+
+
+/* Wrapped Candy's two shockwaves visibly pulse across its blast area. */
+.tile.wrapped-double .gem{animation:wrapped-double-pulse .82s ease-in-out 1;filter:brightness(1.5) drop-shadow(0 0 9px rgba(255,206,122,.95))}
+@keyframes wrapped-double-pulse{0%,100%{transform:translateY(-1px) scale(1);filter:brightness(1)}35%{transform:translateY(-3px) scale(1.18);filter:brightness(1.65) drop-shadow(0 0 11px rgba(255,206,122,.95))}65%{transform:translateY(-1px) scale(.9);filter:brightness(1.25)}}
+@media(prefers-reduced-motion:reduce){.tile.wrapped-double .gem{animation:none}}
