@@ -16,7 +16,7 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
 - **Crystal Quest:** score at least 1,500 points in 25 moves.
 - **Daily Challenge:** a date-based target with 20 moves. Wins can build your daily streak on the current browser.
 - **Infinite Sugar Trail:** endless numbered levels, repeating themed worlds, rising score targets, move limits, collectible-candy and frozen-tile objectives, boss levels every 10 levels, and up to three stars per level. After each win, use the **Next Level → N** button to advance directly to the next level. Choose any level number from the level map.
-- **Crystal Coins & Records:** earn coins from victories and gift boxes, plus claim a **free 50-coin daily gift** once per local calendar day. Wins, coins, best chain, level stars, best scores, and progress are saved locally in your browser.
+- **Crystal Coins & Records:** earn coins from victories and rewards, plus claim a **free 50-coin daily gift** once per local calendar day. Wins, coins, best chain, level stars, best scores, and progress are saved locally in your browser.
 
 ## How to play
 
@@ -24,10 +24,9 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
 2. Select a gem, then select an adjacent gem to swap. On touch screens, swipe a gem toward an adjacent tile.
 3. Match at least three gems of the same colour to score points.
 4. Create special candies:
-   - **Four in a line:** creates a candy gift box.
+   - **Four in a line:** creates a striped candy that clears a full row or column.
    - **Five in a straight line:** creates a rainbow colour bomb.
-   - **T/L-shaped match:** creates a wrapped candy.
-   - **Same-colour 2×2 square:** creates a gift box.
+   - **T/L-shaped match:** creates a wrapped candy with a powerful area blast.
 5. Activate striped, wrapped, and colour-bomb candies by matching them or swapping them with another special candy. Their blasts can trigger further special candies in chain reactions; cascades earn bonus points.
 6. Reach the target score and complete any level objective before moves run out.
 
