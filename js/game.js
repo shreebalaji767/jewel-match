@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const SIZE = 8;
+  const SIZE = 9;
   const TYPES = ['ruby', 'sapphire', 'emerald', 'amethyst', 'topaz', 'diamond'];
   const CLASSIC_TARGET = 1500;
   const CLASSIC_MOVES = 25;
@@ -264,7 +264,7 @@
         tile.setAttribute('role', 'gridcell');
         const type = gemType(board[row][col]);
         const power = gemPower(board[row][col]);
-        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'gift' ? 'candy reward box' : power === 'wrapped' ? 'wrapped bomb' : 'line bomb') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
+        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'gift' ? 'bonus candy' : power === 'wrapped' ? 'wrapped candy' : power === 'row' ? 'striped candy, horizontal' : power === 'column' ? 'striped candy, vertical' : 'special candy') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
         const gem = document.createElement('span');
         gem.className = 'gem ' + type + (power ? ' special-gem bomb-' + power : '');
         if (power) {
@@ -565,20 +565,6 @@
         start = end;
       }
     }
-    // A same-colour 2×2 square is a box match and counts as a special-candy match.
-    for (let row = 0; row < SIZE - 1; row++) {
-      for (let col = 0; col < SIZE - 1; col++) {
-        const type = gemType(board[row][col]);
-        if (type && gemType(board[row][col + 1]) === type &&
-            gemType(board[row + 1][col]) === type &&
-            gemType(board[row + 1][col + 1]) === type) {
-          matched.add(row + ',' + col);
-          matched.add(row + ',' + (col + 1));
-          matched.add((row + 1) + ',' + col);
-          matched.add((row + 1) + ',' + (col + 1));
-        }
-      }
-    }
     return [...matched].map((key) => key.split(',').map(Number));
   }
 
@@ -590,7 +576,7 @@
     if (!matches.length && !forcedBombs.length) return;
 
     const cleared = new Set(matches.map(([row, col]) => row + ',' + col));
-        const runs = [];
+    const runs = [];
     for (let row = 0; row < SIZE; row++) {
       for (let col = 0; col < SIZE; col++) {
         const type = gemType(board[row][col]);
@@ -599,13 +585,12 @@
         while (col + horizontal < SIZE && gemType(board[row][col + horizontal]) === type) horizontal++;
         let vertical = 1;
         while (row + vertical < SIZE && gemType(board[row + vertical][col]) === type) vertical++;
-        if (horizontal >= 4) runs.push({ length: horizontal, row, col, direction: 'row', type });
-        if (vertical >= 4) runs.push({ length: vertical, row, col, direction: 'column', type });
+        if (horizontal >= 3) runs.push({ length: horizontal, row, col, direction: 'row', type });
+        if (vertical >= 3) runs.push({ length: vertical, row, col, direction: 'column', type });
       }
     }
-    runs.sort((a, b) => b.length - a.length);
     let specialPosition = null;
-    // T/L crossings reward skilled play with a rainbow colour bomb.
+    // Candy Crush-style T/L intersections create wrapped candies.
     for (const [row, col] of matches) {
       const type = gemType(board[row][col]);
       let horizontal = 1, vertical = 1;
@@ -613,28 +598,22 @@
       for (let c = col + 1; c < SIZE && gemType(board[row][c]) === type; c++) horizontal++;
       for (let r = row - 1; r >= 0 && gemType(board[r][col]) === type; r--) vertical++;
       for (let r = row + 1; r < SIZE && gemType(board[r][col]) === type; r++) vertical++;
-      if (horizontal >= 3 && vertical >= 3) { specialPosition = { row, col, power: 'wrapped', type }; break; }
-    }
-    // A 2×2 candy box creates a gift candy even though it has no straight run.
-    if (!specialPosition) {
-      for (let row = 0; row < SIZE - 1 && !specialPosition; row++) {
-        for (let col = 0; col < SIZE - 1; col++) {
-          const type = gemType(board[row][col]);
-          if (type && gemType(board[row][col + 1]) === type &&
-              gemType(board[row + 1][col]) === type &&
-              gemType(board[row + 1][col + 1]) === type) {
-            specialPosition = { row: row + 1, col: col + 1, power: 'gift', type };
-            break;
-          }
-        }
+      if (horizontal >= 3 && vertical >= 3) {
+        specialPosition = { row, col, power: 'wrapped', type };
+        break;
       }
     }
-    if (!specialPosition && runs.length) {
-      const run = runs[0];
-      const offset = Math.floor(run.length / 2);
-      specialPosition = run.direction === 'row'
-        ? { row: run.row, col: run.col + offset, power: run.length >= 5 ? 'color' : 'gift', type: run.type }
-        : { row: run.row + offset, col: run.col, power: run.length >= 5 ? 'color' : 'gift', type: run.type };
+    // A straight five-match creates a colour bomb; four creates a directional striped candy.
+    if (!specialPosition) {
+      const longRun = runs.find((run) => run.length >= 5);
+      const fourRun = runs.find((run) => run.length === 4);
+      const run = longRun || fourRun;
+      if (run) {
+        const offset = Math.floor(run.length / 2);
+        specialPosition = run.length >= 5
+          ? { row: run.direction === 'row' ? run.row : run.row + offset, col: run.direction === 'row' ? run.col + offset : run.col, power: 'color', type: run.type }
+          : { row: run.direction === 'row' ? run.row : run.row + offset, col: run.direction === 'row' ? run.col + offset : run.col, power: run.direction, type: run.type };
+      }
     }
 
     const bombQueue = [];
@@ -688,8 +667,9 @@
         for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
         message.textContent = 'STRIPED CANDY! The whole column clears!';
       } else if (power === 'wrapped' || power === 'gift') {
-        for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++) {
-          for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) cleared.add(row + ',' + col);
+        const radius = power === 'wrapped' ? 2 : 1;
+        for (let row = Math.max(0, bomb.row - radius); row <= Math.min(SIZE - 1, bomb.row + radius); row++) {
+          for (let col = Math.max(0, bomb.col - radius); col <= Math.min(SIZE - 1, bomb.col + radius); col++) cleared.add(row + ',' + col);
         }
         if (power === 'gift') {
           const giftReward = 5 + Math.min(20, currentLevel || 1);
@@ -1041,7 +1021,7 @@
   function showHowToPlay() {
     showModal({
       symbol: '✧', eyebrow: 'YOUR CRYSTAL GUIDE', title: 'How to play',
-      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a line or a same-colour 2×2 square creates a gift box; five in a line creates a rainbow colour bomb; a T/L match creates a wrapped candy. Gift boxes blast a 3×3 area and award free coins. Match or swap a special candy to trigger it. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
+      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a line creates a striped candy that clears a full row or column; five in a straight line creates a colour bomb; a T/L match creates a wrapped candy with a larger blast. Match or swap a special candy to trigger it. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
         { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
