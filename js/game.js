@@ -720,6 +720,8 @@
         // the partner's colour; any special candies in that colour then activate.
         comboCells.delete(prism.row + ',' + prism.col);
         if (partner) comboCells.delete(partner.row + ',' + partner.col);
+        enqueueBomb(prism.row, prism.col, prism.targetType);
+        if (partner) enqueueBomb(partner.row, partner.col);
         message.textContent = 'COLORING CANDY! ONE COLOUR TRANSFORMS INTO ANOTHER!';
       } else if (forcedColourBombs.length === 1) {
         const colourBomb = forcedColourBombs[0];
@@ -914,7 +916,7 @@
       const power = gemPower(board[point.row][point.col]);
       return { ...point, targetType: (power === 'color' || power === 'coloring') && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null,
         partnerPower: power === 'color' ? gemPower(board[other.row][other.col]) : null,
-        direction: point.row === other.row ? (other.col > point.col ? 'right' : 'left') : (other.row > point.row ? 'down' : 'up') };
+        direction: point.row === other.row ? (point.col > other.col ? 'right' : 'left') : (point.row > other.row ? 'down' : 'up') };
     });
     if (!matches.length && !swappedBombs.length) {
       await sleep(150);
