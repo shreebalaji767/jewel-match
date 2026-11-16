@@ -618,11 +618,11 @@
 
     const bombQueue = [];
     const queuedBombs = new Set();
-    const enqueueBomb = (row, col, targetType = null) => {
+    const enqueueBomb = (row, col, targetType = null, partnerPower = null) => {
       const key = row + ',' + col;
       if (queuedBombs.has(key)) return;
       queuedBombs.add(key);
-      bombQueue.push({ row, col, targetType });
+      bombQueue.push({ row, col, targetType, partnerPower });
     };
     // Special-candy combos have distinct effects: colour + colour clears the board;
     // colour + another special converts the colour bomb into that special's colour.
@@ -630,9 +630,9 @@
     if (forcedBombs.length > 1 && forcedColourBombs.length === 1) {
       const colourBomb = forcedColourBombs[0];
       const partner = forcedBombs.find((bomb) => bomb !== colourBomb);
-      if (partner) colourBomb.targetType = gemType(board[partner.row]?.[partner.col]);
+      if (partner) { colourBomb.targetType = gemType(board[partner.row]?.[partner.col]); colourBomb.partnerPower = gemPower(board[partner.row]?.[partner.col]); }
     }
-    forcedBombs.forEach(({ row, col, targetType }) => enqueueBomb(row, col, targetType));
+    forcedBombs.forEach(({ row, col, targetType, partnerPower }) => enqueueBomb(row, col, targetType, partnerPower));
     if (forcedBombs.length > 1 && forcedColourBombs.length > 1) {
       for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) cleared.add(row + ',' + col);
       message.textContent = 'RAINBOW FUSION! THE WHOLE BOARD EXPLODES!';
@@ -656,10 +656,18 @@
         const targetType = bomb.targetType || type;
         for (let row = 0; row < SIZE; row++) {
           for (let col = 0; col < SIZE; col++) {
-            if (gemType(board[row][col]) === targetType) cleared.add(row + ',' + col);
+            if (gemType(board[row][col]) !== targetType) continue;
+            if (bomb.partnerPower === 'row' || bomb.partnerPower === 'column') {
+              board[row][col] = targetType + '|' + bomb.partnerPower;
+              enqueueBomb(row, col);
+            } else {
+              cleared.add(row + ',' + col);
+            }
           }
         }
-        message.textContent = 'COLOR BOMB! Every gem of that colour explodes!';
+        message.textContent = bomb.partnerPower === 'row' || bomb.partnerPower === 'column'
+          ? 'COLOUR BOMB + STRIPED CANDY! A whole colour turns into striped blasts!'
+          : 'COLOR BOMB! Every gem of that colour explodes!';
       } else if (power === 'row') {
         for (let col = 0; col < SIZE; col++) cleared.add(bomb.row + ',' + col);
         message.textContent = 'STRIPED CANDY! The whole row clears!';
@@ -759,7 +767,7 @@
     const matches = findMatches();
     const swappedBombs = [first, second].filter((point) => isBomb(board[point.row][point.col])).map((point) => {
       const other = point.row === first.row && point.col === first.col ? second : first;
-      return { ...point, targetType: gemPower(board[point.row][point.col]) === 'color' && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null };
+      return { ...point, targetType: gemPower(board[point.row][point.col]) === 'color' && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null, partnerPower: gemPower(board[point.row][point.col]) === 'color' ? gemPower(board[other.row][other.col]) : null };
     });
     if (!matches.length && !swappedBombs.length) {
       await sleep(150);
