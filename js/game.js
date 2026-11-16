@@ -737,12 +737,17 @@
         message.textContent = colourBomb.partnerPower === 'wrapped'
           ? 'COLOR BOMB + WRAPPED! ONE COLOUR BECOMES WRAPPED CANDIES!'
           : 'COLOR BOMB + STRIPED! ONE COLOUR BECOMES STRIPED BLASTS!';
+      } else {
+        // Unlisted pairings (for example Fish + Coconut Wheel) still activate
+        // both specials normally instead of silently swallowing the swap.
+        comboCells.delete(first.row + ',' + first.col);
+        comboCells.delete(second.row + ',' + second.col);
       }
     }
     // Combo-consumed specials are not detonated a second time by their ordinary effect.
     const triggeredBombs = new Set(comboCells);
-    forcedBombs.forEach(({ row, col, targetType, partnerPower }) => {
-      if (!comboCells.has(row + ',' + col)) enqueueBomb(row, col, targetType, partnerPower);
+    forcedBombs.forEach(({ row, col, targetType, partnerPower, direction }) => {
+      if (!comboCells.has(row + ',' + col)) enqueueBomb(row, col, targetType, partnerPower, direction);
     });
     matches.forEach(([row, col]) => {
       if (isBomb(board[row][col]) && !comboCells.has(row + ',' + col)) enqueueBomb(row, col);
