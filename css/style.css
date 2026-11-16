@@ -686,3 +686,14 @@ h1{font-size:clamp(42px,5.4vw,76px);line-height:1.01;letter-spacing:clamp(-2.5px
 @media(max-width:700px){
   .gameplay-video{width:100%;height:100%;object-fit:cover}
 }
+
+
+/* Targeted booster states */
+.booster-button{white-space:nowrap}
+.booster-button.booster-active{border-color:#ffe29a;background:linear-gradient(135deg,rgba(255,211,119,.24),rgba(244,169,208,.13));color:#fff2c8;box-shadow:0 0 0 2px rgba(255,226,154,.16),0 5px 18px rgba(255,196,103,.12)}
+.booster-button:focus-visible{outline:2px solid #ffe29a;outline-offset:2px}
+@media(max-width:420px){
+  .quick-tools{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .quick-tools .secondary-button{min-width:0;padding:8px 5px;font-size:10px;white-space:normal}
+  .quick-tools .secondary-button span{overflow-wrap:anywhere}
+}
