@@ -52,6 +52,7 @@
   let hintTimer = null;
   let gameRun = 0;
   let pointerStart = null;
+  let activeBooster = null;
   let undoSnapshot = null;
   let best = readBest();
   let runBestAtStart = best;
@@ -856,11 +857,94 @@
     }
   }
 
+  const BOOSTERS = { hammer: { cost: 25, label: 'Hammer' }, row: { cost: 40, label: 'Row blast' }, rainbow: { cost: 60, label: 'Rainbow' } };
+
+  function armBooster(type) {
+    if (busy || paused || moves <= 0 || gameScreen.classList.contains('hidden')) return;
+    const booster = BOOSTERS[type];
+    if (!booster) return;
+    if (activeBooster === type) {
+      activeBooster = null;
+      document.querySelectorAll('.booster-button').forEach((button) => button.classList.remove('booster-active'));
+      message.textContent = 'Booster cancelled. Make your next match!';
+      return;
+    }
+    if (crystalCoins < booster.cost) {
+      showToast('You need ' + booster.cost + ' coins for ' + booster.label + '.');
+      return;
+    }
+    activeBooster = type;
+    document.querySelectorAll('.booster-button').forEach((button) => button.classList.toggle('booster-active', button.id === type + '-booster'));
+    message.textContent = booster.label + ' ready — tap a gem to choose the target. Costs ' + booster.cost + ' coins; no move is used.';
+    showToast(booster.label + ' ready. Choose a target gem!');
+  }
+
+  async function useBooster(type, point) {
+    const booster = BOOSTERS[type];
+    if (!booster || busy || paused || crystalCoins < booster.cost) return;
+    const runId = gameRun;
+    busy = true;
+    activeBooster = null;
+    document.querySelectorAll('.booster-button').forEach((button) => button.classList.remove('booster-active'));
+    crystalCoins -= booster.cost;
+    const targetType = gemType(board[point.row][point.col]);
+    const cleared = [];
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        const hit = type === 'hammer'
+          ? row === point.row && col === point.col
+          : type === 'row'
+            ? row === point.row
+            : gemType(board[row][col]) === targetType;
+        if (hit && board[row][col] !== null) cleared.push([row, col]);
+      }
+    }
+    let gained = 0;
+    cleared.forEach(([row, col]) => {
+      if (ice[row][col]) {
+        ice[row][col] = false;
+        iceRemaining = Math.max(0, iceRemaining - 1);
+      }
+      if (currentMode === 'adventure' && levelGoal === 'collect' &&
+          gemType(board[row][col]) === TYPES[(currentLevel - 1) % TYPES.length]) goalProgress++;
+      board[row][col] = null;
+      gained += 60;
+    });
+    score += gained;
+    for (let col = 0; col < SIZE; col++) {
+      let write = SIZE - 1;
+      for (let row = SIZE - 1; row >= 0; row--) {
+        if (board[row][col] !== null) {
+          board[write][col] = board[row][col];
+          ice[write][col] = ice[row][col];
+          write--;
+        }
+      }
+      for (let row = write; row >= 0; row--) {
+        board[row][col] = randomType();
+        ice[row][col] = false;
+      }
+    }
+    persistProgress();
+    renderBoard();
+    updateStats();
+    message.textContent = booster.label + ' cleared ' + cleared.length + ' gems! Cascades may follow.';
+    playTone(720, .16, 'triangle');
+    await sleep(120);
+    if (runId === gameRun) await clearMatches(runId, 1);
+    if (runId !== gameRun) return;
+    busy = false;
+    updateUndoButton();
+    ensurePossibleMove();
+    showToast(booster.label + ' used · ' + cleared.length + ' gems cleared · −' + booster.cost + ' coins');
+  }
+
   boardElement.addEventListener('click', (event) => {
     if (pointerHandled) { pointerHandled = false; return; }
     const tile = event.target.closest('.tile');
     if (!tile || busy || paused || moves <= 0) return;
     const current = coordinates(tile);
+    if (activeBooster) { useBooster(activeBooster, current); return; }
     if (!selected) {
       selected = current;
       updateSelection();
@@ -994,6 +1078,9 @@
     paused = true;
     updateUndoButton();
   });
+  $('#hammer-booster')?.addEventListener('click', () => armBooster('hammer'));
+  $('#row-booster')?.addEventListener('click', () => armBooster('row'));
+  $('#rainbow-booster')?.addEventListener('click', () => armBooster('rainbow'));
   $('#hint-button').addEventListener('click', hint);
   $('#undo-button').addEventListener('click', undoLastMove);
   $('#shuffle-button').addEventListener('click', () => {
