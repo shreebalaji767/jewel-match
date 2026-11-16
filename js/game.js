@@ -680,6 +680,7 @@
 
     const bombQueue = [];
     const coconutRollCells = [];
+    const wrappedBlastCells = new Set();
     const queuedBombs = new Set();
     const enqueueBomb = (row, col, targetType = null, partnerPower = null, direction = null) => {
       const key = row + ',' + col;
@@ -820,11 +821,15 @@
         for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
         message.textContent = 'STRIPED CANDY! The whole column clears!';
       } else if (power === 'wrapped') {
-        // The two 3×3 shockwaves are represented by their combined 5×5 footprint
-        // in this single-collapse board engine.
-        for (let row = Math.max(0, bomb.row - 2); row <= Math.min(SIZE - 1, bomb.row + 2); row++)
-          for (let col = Math.max(0, bomb.col - 2); col <= Math.min(SIZE - 1, bomb.col + 2); col++) cleared.add(row + ',' + col);
-        message.textContent = 'WRAPPED CANDY! DOUBLE EXPLOSION!';
+        // Two 3×3 pulses hit the same area. On frozen tiles, the first pulse
+        // cracks the ice and the second clears the candy underneath.
+        for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++)
+          for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) {
+            const key = row + ',' + col;
+            cleared.add(key);
+            wrappedBlastCells.add(key);
+          }
+        message.textContent = 'WRAPPED CANDY! TWO EXPLOSIONS — CRACK, THEN CLEAR!';
       } else if (power === 'fish') {
         cleared.add(bomb.row + ',' + bomb.col);
         const candidates = [];
@@ -848,6 +853,11 @@
     coconutRollCells.forEach(({row,col}) => {
       const tile = boardElement.querySelector('.tile[data-row="' + row + '"][data-col="' + col + '"]');
       if (tile) tile.classList.add('coconut-roll');
+    });
+    wrappedBlastCells.forEach((key) => {
+      const [row,col] = key.split(',').map(Number);
+      const tile = boardElement.querySelector('.tile[data-row="' + row + '"][data-col="' + col + '"]');
+      if (tile) tile.classList.add('wrapped-double');
     });
 
     if (specialPosition) {
@@ -890,7 +900,12 @@
     if (runId !== gameRun) return;
     clearCoords.forEach(([row, col]) => {
       if (specialPosition && row === specialPosition.row && col === specialPosition.col) { ice[row][col] = false; return; }
-      if (ice[row][col]) { ice[row][col] = false; iceRemaining = Math.max(0, iceRemaining - 1); return; }
+      if (ice[row][col]) {
+        ice[row][col] = false;
+        iceRemaining = Math.max(0, iceRemaining - 1);
+        if (wrappedBlastCells.has(row + ',' + col)) board[row][col] = null;
+        return;
+      }
       if (currentMode === 'adventure' && levelGoal === 'collect' && gemType(board[row][col]) === TYPES[(currentLevel - 1) % TYPES.length]) goalProgress++;
       board[row][col] = null;
     });
