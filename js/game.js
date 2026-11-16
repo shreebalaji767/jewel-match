@@ -688,6 +688,7 @@
     };
     // Resolve the six classic two-special swap combinations before individual effects.
     const forcedColourBombs = forcedBombs.filter(({ row, col }) => gemPower(board[row]?.[col]) === 'color');
+    const forcedColoring = forcedBombs.filter(({ row, col }) => gemPower(board[row]?.[col]) === 'coloring');
     const comboCells = new Set();
     if (forcedBombs.length > 1) {
       const [first, second] = forcedBombs;
@@ -711,6 +712,14 @@
         for (let col = Math.max(0,centerCol-1); col <= Math.min(SIZE-1,centerCol+1); col++)
           for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + col);
         message.textContent = 'STRIPED + WRAPPED! THREE ROWS AND THREE COLUMNS BLASTED!';
+      } else if (forcedColoring.length === 1) {
+        const prism = forcedColoring[0];
+        const partner = forcedBombs.find((bomb) => bomb !== prism);
+        prism.targetType = partner ? gemType(board[partner.row]?.[partner.col]) : null;
+        enqueueBomb(prism.row, prism.col, prism.targetType);
+        comboCells.add(prism.row + ',' + prism.col);
+        if (partner) comboCells.add(partner.row + ',' + partner.col);
+        message.textContent = 'COLORING CANDY! A WHOLE COLOUR TRANSFORMS INTO A DAZZLING CASCADE!';
       } else if (forcedColourBombs.length === 1) {
         const colourBomb = forcedColourBombs[0];
         const partner = forcedBombs.find((bomb) => bomb !== colourBomb);
@@ -744,7 +753,27 @@
       const power = gemPower(gem);
       const type = gemType(gem);
       if (!power) continue;
-      if (power === 'color') {
+      if (power === 'coloring') {
+        const targetType = bomb.targetType || type;
+        for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) {
+          if (gemType(board[row][col]) === targetType) cleared.add(row + ',' + col);
+        }
+        message.textContent = 'COLORING CANDY! THE WHOLE COLOUR SHIMMERS AWAY!';
+      } else if (power === 'coconut') {
+        const horizontal = bomb.direction !== 'column';
+        const powered = [];
+        for (let step = 1; step <= 3; step++) {
+          const row = bomb.row + (horizontal ? 0 : step);
+          const col = bomb.col + (horizontal ? step : 0);
+          if (row >= SIZE || col >= SIZE) break;
+          if (board[row][col] !== null) {
+            board[row][col] = gemType(board[row][col]) + '|' + (horizontal ? 'row' : 'column');
+            powered.push({row,col});
+          }
+        }
+        powered.forEach(({row,col}) => enqueueBomb(row,col));
+        message.textContent = 'COCONUT WHEEL! THREE CANDIES POWER UP INTO STRIPED BLASTS!';
+      } else if (power === 'color') {
         const targetType = bomb.targetType || type;
         for (let row = 0; row < SIZE; row++) {
           for (let col = 0; col < SIZE; col++) {
@@ -801,7 +830,7 @@
         message.textContent = 'FOUR-JEWEL MATCH! STRIPED CANDY CREATED!';
         showToast('✦ Striped candy created! Swap or match it to clear a full ' + (specialPosition.power === 'row' ? 'row' : 'column') + '.');
       } else {
-        showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : specialPosition.power === 'fish' ? '🐟 Candy Fish created!' : '✦ Wrapped candy created!');
+        showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : specialPosition.power === 'coloring' ? '🌈 Coloring Candy created!' : specialPosition.power === 'coconut' ? '🥥 Coconut Wheel created!' : specialPosition.power === 'fish' ? '🐟 Candy Fish created!' : '✦ Wrapped candy created!');
       }
     }
     const clearCoords = [...cleared].map((key) => key.split(',').map(Number));
@@ -869,7 +898,10 @@
     const matches = findMatches();
     const swappedBombs = [first, second].filter((point) => isBomb(board[point.row][point.col])).map((point) => {
       const other = point.row === first.row && point.col === first.col ? second : first;
-      return { ...point, targetType: gemPower(board[point.row][point.col]) === 'color' && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null, partnerPower: gemPower(board[point.row][point.col]) === 'color' ? gemPower(board[other.row][other.col]) : null };
+      const power = gemPower(board[point.row][point.col]);
+      return { ...point, targetType: (power === 'color' || power === 'coloring') && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null,
+        partnerPower: power === 'color' ? gemPower(board[other.row][other.col]) : null,
+        direction: first.row === second.row ? 'row' : 'column' };
     });
     if (!matches.length && !swappedBombs.length) {
       await sleep(150);
@@ -1131,7 +1163,7 @@
   function showHowToPlay() {
     showModal({
       symbol: '✧', eyebrow: 'YOUR CRYSTAL GUIDE', title: 'How to play',
-      copy: 'Match 3 to clear. Four in a straight line creates a striped candy (row or column blast); five in a line creates a Color Bomb. T/L matches create a Wrapped Candy, and a 2×2 square creates a Candy Fish in supported modes. Swap two special candies for combos: striped+striped clears a row and column; striped+wrapped clears 3 rows and 3 columns; Color Bomb+striped turns one colour into striped blasts; Color Bomb+wrapped turns one colour into wrapped blasts; wrapped+wrapped makes a double explosion; Color Bomb+Color Bomb clears almost the whole board. Striped clears a full line, Wrapped explodes twice, Color Bomb removes a colour, and Fish target candies or blockers. Coconut Wheel and Coloring Candy are reserved for special modes. ' + 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!',
+      copy: 'Match 3 to clear. Four in a straight line creates a striped candy (row or column blast); five in a line creates a Color Bomb. T/L matches create a Wrapped Candy, and a 2×2 square creates a Candy Fish in supported modes. Swap two special candies for combos: striped+striped clears a row and column; striped+wrapped clears 3 rows and 3 columns; Color Bomb+striped turns one colour into striped blasts; Color Bomb+wrapped turns one colour into wrapped blasts; wrapped+wrapped makes a double explosion; Color Bomb+Color Bomb clears the board. Coloring Candy clears a selected colour, Coconut Wheel turns the next three candies into striped blasts, and Fish seek candies or blockers. ' + 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!',
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
         { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
