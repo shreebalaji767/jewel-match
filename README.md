@@ -34,6 +34,7 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
 ## Free tools and controls
 
 - **Daily crystal gift:** claim 50 free coins from the home screen once per local calendar day. The claim and coin balance are stored locally; no account or internet connection is needed after the app is loaded.
+- **Targeted boosters:** use the Hammer (25 coins) to clear one gem, Row Blast (40 coins) to clear a full row, or Rainbow (60 coins) to clear every gem matching the selected colour. Choose a booster, then tap its target. Boosters do not consume a move; coins are earned through play and daily rewards.
 - **Hint:** highlights a possible move.
 - **Free shuffle:** reshuffles the board without spending a move or removing frozen objectives.
 - **Undo move:** reverses your most recent valid move. It restores the previous board, score, moves, frozen tiles, level-objective progress, coins, and best-chain value. Only the latest valid move can be undone; a new valid move creates a new undo point.
@@ -95,6 +96,7 @@ The game uses relative asset paths so it can run from the repository's GitHub Pa
 - **Infinite Sugar Trail:** 10 themed worlds cycle forever; score targets and objectives scale with level, and every 10th level is a boss with frozen tiles and a 100-coin chest.
 - **Difficulty selection:** choose Easy, Normal, Hard, or Expert. Difficulty changes target scores, available moves, and frozen-tile objectives and is saved in localStorage.
 - **Gameplay preview:** the landing page includes an original, generated looping gameplay-demo video, muted and inline for autoplay compatibility.
+- **Coin-powered boosters:** three targetable power-ups add tactical choices without purchases or paywalls. Booster costs are earned in-game, and each use clears its target before normal gravity and cascades resolve.
 - **Achievement collection book:** earn rewards for victories, cascades, daily streaks, progress across 10 levels, and three-star clears. Achievements are saved locally.
 - **Accessibility settings:** reduce animation effects or enable gem shape markers for colour-independent play.
 - **Save backup tools:** export progress as a JSON file or import a previous backup by pasting its contents. Import replaces matching local progress keys on this browser; export a backup first.
