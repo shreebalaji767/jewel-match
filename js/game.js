@@ -756,11 +756,13 @@
       if (!power) continue;
       if (power === 'coloring') {
         const targetType = bomb.targetType || type;
+        cleared.add(bomb.row + ',' + bomb.col);
         for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) {
           if (gemType(board[row][col]) === targetType) cleared.add(row + ',' + col);
         }
         message.textContent = 'COLORING CANDY! THE WHOLE COLOUR SHIMMERS AWAY!';
       } else if (power === 'coconut') {
+        cleared.add(bomb.row + ',' + bomb.col);
         const horizontal = bomb.direction === 'left' || bomb.direction === 'right' || !bomb.direction;
         const sign = bomb.direction === 'left' || bomb.direction === 'up' ? -1 : 1;
         const powered = [];
@@ -777,6 +779,7 @@
         message.textContent = 'COCONUT WHEEL! THREE CANDIES POWER UP INTO STRIPED BLASTS!';
       } else if (power === 'color') {
         const targetType = bomb.targetType || type;
+        cleared.add(bomb.row + ',' + bomb.col);
         for (let row = 0; row < SIZE; row++) {
           for (let col = 0; col < SIZE; col++) {
             if (gemType(board[row][col]) !== targetType) continue;
@@ -806,6 +809,7 @@
           for (let col = Math.max(0, bomb.col - 2); col <= Math.min(SIZE - 1, bomb.col + 2); col++) cleared.add(row + ',' + col);
         message.textContent = 'WRAPPED CANDY! DOUBLE EXPLOSION!';
       } else if (power === 'fish') {
+        cleared.add(bomb.row + ',' + bomb.col);
         const candidates = [];
         for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) {
           const key = row + ',' + col;
