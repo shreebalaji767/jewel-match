@@ -719,6 +719,7 @@
         enqueueBomb(prism.row, prism.col, prism.targetType);
         comboCells.add(prism.row + ',' + prism.col);
         if (partner) comboCells.add(partner.row + ',' + partner.col);
+        comboCells.delete(prism.row + ',' + prism.col);
         message.textContent = 'COLORING CANDY! A WHOLE COLOUR TRANSFORMS INTO A DAZZLING CASCADE!';
       } else if (forcedColourBombs.length === 1) {
         const colourBomb = forcedColourBombs[0];
@@ -1164,7 +1165,7 @@
   function showHowToPlay() {
     showModal({
       symbol: '✧', eyebrow: 'YOUR CRYSTAL GUIDE', title: 'How to play',
-      copy: 'Match 3 to clear. Four in a straight line creates a striped candy (row or column blast); five in a line creates a Color Bomb. T/L matches create a Wrapped Candy, and a 2×2 square creates a Candy Fish in supported modes. Swap two special candies for combos: striped+striped clears a row and column; striped+wrapped clears 3 rows and 3 columns; Color Bomb+striped turns one colour into striped blasts; Color Bomb+wrapped turns one colour into wrapped blasts; wrapped+wrapped makes a double explosion; Color Bomb+Color Bomb clears the board. Coloring Candy clears a selected colour, Coconut Wheel turns the next three candies into striped blasts, and Fish seek candies or blockers. ' + 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!',
+      copy: 'Match 3 to clear. Four in a straight line creates a Striped Candy; five creates a Color Bomb; six creates a Coloring Candy. T/L matches create a Wrapped Candy, a 2×2 square creates a Candy Fish, and a 2×3 same-colour block creates a Coconut Wheel. Swap two specials for powerful combos: striped+striped clears a row and column; striped+wrapped blasts 3 rows and 3 columns; Color Bomb+striped turns one colour into striped blasts; Color Bomb+wrapped turns one colour into wrapped blasts; wrapped+wrapped makes a huge double explosion; Color Bomb+Color Bomb clears the board. Coloring Candy clears the colour of the candy it is swapped with. Coconut Wheel powers the next three candies in the swap direction into striped blasts. Fish seek candies and frozen blockers. ' + 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!',
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
         { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
