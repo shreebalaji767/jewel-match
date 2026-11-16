@@ -679,6 +679,7 @@
     }
 
     const bombQueue = [];
+    const coconutRollCells = [];
     const queuedBombs = new Set();
     const enqueueBomb = (row, col, targetType = null, partnerPower = null, direction = null) => {
       const key = row + ',' + col;
@@ -776,6 +777,7 @@
         message.textContent = 'COLORING CANDY! ' + recoloured + ' CANDIES CHANGED COLOUR — MATCH THE NEW PATTERNS!';
       } else if (power === 'coconut') {
         cleared.add(bomb.row + ',' + bomb.col);
+        coconutRollCells.push({row:bomb.row,col:bomb.col});
         const horizontal = bomb.direction === 'left' || bomb.direction === 'right' || !bomb.direction;
         const sign = bomb.direction === 'left' || bomb.direction === 'up' ? -1 : 1;
         const powered = [];
@@ -787,6 +789,7 @@
           if (board[row][col] !== null) {
             board[row][col] = gemType(board[row][col]) + '|' + (horizontal ? 'row' : 'column');
             powered.push({row,col});
+            coconutRollCells.push({row,col});
           }
         }
         powered.forEach(({row,col}) => enqueueBomb(row,col));
@@ -842,6 +845,10 @@
       }
     }
     const bombsToTrigger = [...triggeredBombs].map((key) => key.split(',').map(Number));
+    coconutRollCells.forEach(({row,col}) => {
+      const tile = boardElement.querySelector('.tile[data-row="' + row + '"][data-col="' + col + '"]');
+      if (tile) tile.classList.add('coconut-roll');
+    });
 
     if (specialPosition) {
       cleared.delete(specialPosition.row + ',' + specialPosition.col);
