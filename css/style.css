@@ -942,3 +942,10 @@ body{
 .tile.wrapped-double .gem{animation:wrapped-double-pulse .82s ease-in-out 1;filter:brightness(1.5) drop-shadow(0 0 9px rgba(255,206,122,.95))}
 @keyframes wrapped-double-pulse{0%,100%{transform:translateY(-1px) scale(1);filter:brightness(1)}35%{transform:translateY(-3px) scale(1.18);filter:brightness(1.65) drop-shadow(0 0 11px rgba(255,206,122,.95))}65%{transform:translateY(-1px) scale(.9);filter:brightness(1.25)}}
 @media(prefers-reduced-motion:reduce){.tile.wrapped-double .gem{animation:none}}
+
+
+/* Candy Crush-style life counter and locked level-map states. */
+.progress-rewards span{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+#life-timer-home{display:block;flex-basis:100%;padding-left:20px;color:var(--muted);font-size:10px}
+.modal-actions button:disabled{opacity:.36;cursor:not-allowed;filter:grayscale(.8);transform:none;box-shadow:none}
+@media(max-width:560px){.progress-rewards{grid-template-columns:repeat(2,minmax(0,1fr))}.progress-rewards span{justify-content:center}}

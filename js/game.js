@@ -28,6 +28,12 @@
     return { label: 'Master Trail', target: 1.32, moves: -5, ice: 10 };
   }
   function updateDifficultyButton() { const button=$('#difficulty-button'); if(button) button.textContent='🎚 Difficulty: '+difficultySettings().label; }
+  const MAX_LIVES = 5;
+  const LIFE_RECHARGE_MS = 30 * 60 * 1000;
+  function readLives() { try { const raw=localStorage.getItem('jewel-match-lives'); return raw===null?MAX_LIVES:Math.max(0,Math.min(MAX_LIVES,Number.parseInt(raw,10)||0)); } catch (_) { return MAX_LIVES; } }
+  function readLifeTimestamp() { try { return Math.max(0,Number(localStorage.getItem('jewel-match-next-life'))||0); } catch (_) { return 0; } }
+  let lives = readLives();
+  let nextLifeAt = readLifeTimestamp();
   let adventureLevel = readNumber('jewel-match-level', 1);
   let crystalCoins = readNumber('jewel-match-coins', 0);
   let gamesWon = readNumber('jewel-match-wins', 0);
@@ -98,7 +104,7 @@
     showModal({symbol:'🏆',eyebrow:'YOUR COLLECTION BOOK',title:'Achievements '+n+'/'+e.length,copy:textLines+' • Wins: '+gamesWon+' • Best chain: '+bestChain+' • Daily streak: '+dailyStreak,actions:[{label:'Close collection',run:hideModal}]});
   }
   function exportSave() {
-    const keys=['jewel-match-difficulty','jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist'];
+    const keys=['jewel-match-difficulty','jewel-match-level','jewel-match-coins','jewel-match-wins','jewel-match-best-chain','jewel-match-stars','jewel-match-best','jewel-match-daily-streak','jewel-match-daily-last-win','jewel-match-sound','jewel-match-daily-gift-date','jewel-match-achievements','jewel-match-reduced-effects','jewel-match-shape-assist','jewel-match-lives','jewel-match-next-life'];
     const data={app:'Jewel Match',format:1,exportedAt:new Date().toISOString(),progress:{}};
     keys.forEach((key)=>{try{const v=localStorage.getItem(key);if(v!==null)data.progress[key]=v;}catch(_){}});
     try { for (let i=0;i<localStorage.length;i++) { const key=localStorage.key(i); if (key && key.startsWith('jewel-match-daily-best-')) data.progress[key]=localStorage.getItem(key); } } catch (_) {}
@@ -133,6 +139,43 @@
     try { localStorage.setItem('jewel-match-stars', JSON.stringify(levelStars)); } catch (_) {}
   }
 
+  function saveLives() {
+    try { localStorage.setItem('jewel-match-lives', String(lives)); localStorage.setItem('jewel-match-next-life', String(nextLifeAt)); } catch (_) {}
+  }
+  function formatLifeWait() {
+    const remaining=Math.max(0,nextLifeAt-Date.now());
+    const minutes=Math.floor(remaining/60000), seconds=Math.floor((remaining%60000)/1000);
+    return minutes+'m '+String(seconds).padStart(2,'0')+'s';
+  }
+  function updateLivesUI() {
+    const count=$('#lives-home'), timer=$('#life-timer-home');
+    if(count) count.textContent=lives+'/'+MAX_LIVES;
+    if(timer) timer.textContent=lives>=MAX_LIVES?'Full':nextLifeAt?'Next in '+formatLifeWait():'Ready';
+  }
+  function refreshLives() {
+    const now=Date.now();
+    if(lives<MAX_LIVES) {
+      if(!nextLifeAt) nextLifeAt=now+LIFE_RECHARGE_MS;
+      while(lives<MAX_LIVES && now>=nextLifeAt) { lives++; nextLifeAt+=LIFE_RECHARGE_MS; }
+      if(lives>=MAX_LIVES) nextLifeAt=0;
+    } else nextLifeAt=0;
+    saveLives(); updateLivesUI();
+  }
+  function loseLife() {
+    refreshLives();
+    if(lives>0) lives--;
+    if(lives<MAX_LIVES && !nextLifeAt) nextLifeAt=Date.now()+LIFE_RECHARGE_MS;
+    saveLives(); updateLivesUI();
+  }
+  function showLivesModal() {
+    refreshLives();
+    showModal({symbol:'❤️',eyebrow:'SUGAR TRAIL LIVES',title:lives+' / '+MAX_LIVES+' lives remaining',copy:lives>0?'You have lives ready to play. A life is used only when an Adventure level ends without success.':'You are out of lives. One free life regenerates every 30 minutes. Your next life arrives in '+formatLifeWait()+'. No purchases or accounts are needed.',actions:[{label:lives>0?'Continue Sugar Trail':'Back to home',run:()=>{if(lives>0)startGame('adventure');else goHome();}},{label:'Close',run:hideModal}]});
+  }
+  function highestUnlockedLevel() {
+    const completed=Object.keys(levelStars).reduce((highest,key)=>{const n=Number(key);return Number.isSafeInteger(n)&&Number(levelStars[key])>0?Math.max(highest,n+1):highest;},1);
+    return Math.max(1,adventureLevel,completed);
+  }
+
   function showLevelMap() {
     const actions = [];
     const worlds = [
@@ -146,13 +189,13 @@
       const stars = Number(levelStars[level]) || 0;
       const world = worlds[Math.floor((level - 1) / 10) % worlds.length];
       const boss = level % 10 === 0;
-      const label = boss ? '👑 BOSS ' + level : world.icon + ' ' + level;
-      actions.push({ label: label + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '· · ·'), run: () => startGame('adventure', level) });
+      const locked = level > highestUnlockedLevel();
+      const label = locked ? '🔒 ' + level : boss ? '👑 BOSS ' + level : world.icon + ' ' + level;
+      actions.push({ label: label + '  ' + (stars ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : locked ? 'LOCKED' : '· · ·'), disabled: locked, run: () => startGame('adventure', level) });
     }
-    actions.unshift({ label: '∞ Choose any level', run: () => { const raw=window.prompt('Choose any Sugar Trail level number. Levels continue forever.', String(adventureLevel)); if(raw===null)return; const level=Number(raw.trim()); if(!Number.isSafeInteger(level)||level<1){showToast('Enter a whole level number greater than zero.');return;} startGame('adventure',level); } });
     actions.unshift({ label: '▶ Continue · Level '+adventureLevel+' · '+difficultySettings().label, run: () => startGame('adventure') });
     actions.push({ label: 'Close map', run: hideModal });
-    showModal({symbol:'🗺',eyebrow:'SUGAR TRAIL · INFINITE WORLDS',title:'Choose a level',copy:worlds.map((world,index)=>((index+1)+'. '+world.name)).join('  •  ')+'. Worlds repeat with tougher goals forever. Every 10th level is a boss challenge with frozen tiles and a 100-coin chest. Choose any level number, with no final level.',actions});
+    showModal({symbol:'🗺',eyebrow:'SUGAR TRAIL · INFINITE WORLDS',title:'Choose a level',copy:worlds.map((world,index)=>((index+1)+'. '+world.name)).join('  •  ')+'. Worlds repeat with tougher goals forever. Complete a level to unlock the next one. Completed levels stay available for replay and star improvement. Every 10th level is a boss challenge with frozen tiles and a treasure chest.',actions});
   }
 
   function dailyGiftClaimedToday() {
@@ -194,11 +237,14 @@
       localStorage.setItem('jewel-match-coins', String(crystalCoins));
       localStorage.setItem('jewel-match-wins', String(gamesWon));
       localStorage.setItem('jewel-match-best-chain', String(bestChain));
+      localStorage.setItem('jewel-match-lives', String(lives));
+      localStorage.setItem('jewel-match-next-life', String(nextLifeAt));
     } catch (_) {}
     const levelNode = $('#level-home'); if (levelNode) levelNode.textContent = adventureLevel;
     const coinsNode = $('#coins-home'); if (coinsNode) coinsNode.textContent = crystalCoins.toLocaleString();
     const winsNode = $('#wins-home'); if (winsNode) winsNode.textContent = gamesWon;
     const chainNode = $('#chain-home'); if (chainNode) chainNode.textContent = bestChain;
+    updateLivesUI();
   }
 
   function readBest() {
@@ -377,6 +423,7 @@
     actions.forEach((action, index) => {
       const button = document.createElement('button');
       button.type = 'button';
+      button.disabled = Boolean(action.disabled);
       button.textContent = action.label;
       button.className = index === 0 ? 'primary-button' : 'secondary-button';
       button.addEventListener('click', action.run);
@@ -410,6 +457,7 @@
   }
 
   function startGame(mode = currentMode, requestedLevel = null) {
+    if (mode === 'adventure') { refreshLives(); if (lives <= 0) { showLivesModal(); return; } }
     currentMode = mode;
     activeBooster = null;
     undoSnapshot = null;
@@ -1010,7 +1058,8 @@
         celebration: true,
         copy: 'You reached ' + score.toLocaleString() + ' points with ' + moves + ' moves left. Earned ' + reward + ' crystal coins including +' + (moves*5) + ' for unused moves' + (chestBonus?' and a treasure chest bonus of '+chestBonus+' coins':'') + '. ' + (bossLevel ? 'Boss chest claimed! ' : '') + (currentMode === 'adventure' ? 'Stars earned: ' + '★'.repeat(Number(levelStars[currentLevel]) || 1) + '☆'.repeat(3 - (Number(levelStars[currentLevel]) || 1)) + '. Next up: Level ' + adventureLevel + '. ' : currentMode === 'daily' ? 'Daily streak: ' + dailyStreak + ' day' + (dailyStreak === 1 ? '' : 's') + '! ' : '') + 'Beautifully played!',
         actions: [
-          { label: currentMode === 'adventure' ? '▶ NEXT LEVEL · ' + (currentLevel + 1) : 'Play again', run: () => currentMode === 'adventure' ? startGame('adventure', currentLevel + 1) : startGame(currentMode) },
+          { label: currentMode === 'adventure' ? '▶ NEXT LEVEL · ' + adventureLevel : 'Play again', run: () => currentMode === 'adventure' ? startGame('adventure', adventureLevel) : startGame(currentMode) },
+          ...(currentMode === 'adventure' ? [{ label: '🗺 Level map', run: showLevelMap }] : []),
           { label: 'Back to home', run: goHome }
         ]
       });
@@ -1018,6 +1067,7 @@
       updateUndoButton();
     } else if (moves <= 0) {
       const targetReached = score >= currentTarget && objectiveComplete;
+      if (!targetReached && currentMode === 'adventure') loseLife();
       showModal({
         symbol: targetReached ? '✧' : '◇',
         eyebrow: targetReached ? 'QUEST COMPLETE' : 'KEEP THE SPARKLE ALIVE',
@@ -1026,7 +1076,8 @@
           ? 'You scored ' + score.toLocaleString() + ' points and reached your target!'
           : 'You scored ' + score.toLocaleString() + ' points. ' + (score < currentTarget ? 'You were ' + (currentTarget - score).toLocaleString() + ' points away. ' : currentMode === 'adventure' && levelGoal === 'ice' ? iceRemaining + ' frozen tiles remain. ' : currentMode === 'adventure' && levelGoal === 'collect' ? Math.max(0, goalTarget - goalProgress) + ' candies still to collect. ' : '') + 'Try again?',
         actions: [
-          { label: currentMode === 'adventure' ? '↻ Replay Level ' + currentLevel : '↻ Play Again', run: () => startGame(currentMode, currentMode === 'adventure' ? currentLevel : null) },
+          { label: currentMode === 'adventure' ? (lives > 0 ? '↻ Replay Level ' + currentLevel : '❤️ Lives refill · ' + formatLifeWait()) : '↻ Play Again', run: () => currentMode === 'adventure' ? (lives > 0 ? startGame('adventure', currentLevel) : showLivesModal()) : startGame(currentMode) },
+          ...(currentMode === 'adventure' ? [{ label: '🗺 Level map', run: showLevelMap }] : []),
           { label: 'Back to home', run: goHome }
         ]
       });
@@ -1225,6 +1276,8 @@
     if (!gameScreen.classList.contains('hidden')) paused = true;
   }
 
+  refreshLives();
+  setInterval(refreshLives, 15000);
   $('#play-button').addEventListener('click', () => startGame('classic'));
   $('#daily-button').addEventListener('click', () => startGame('daily'));
   $('#adventure-button').addEventListener('click', () => startGame('adventure'));
