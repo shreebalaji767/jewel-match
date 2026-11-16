@@ -1,6 +1,6 @@
 # Jewel Match ✦
 
-A colourful, responsive, Candy Crush-inspired match-three puzzle adventure built with plain HTML, CSS, and JavaScript. No framework, build step, external images, or audio files are required.
+A colourful, responsive, original match-three puzzle adventure with classic mobile match-3 mechanics built with plain HTML, CSS, and JavaScript. No framework, build step, external images, or audio files are required.
 
 ## Play
 
@@ -28,7 +28,7 @@ Jewel Match is free to play with **no ads, no ad SDKs, no in-app purchases, no s
    - **Five in a straight line:** creates a rainbow colour bomb.
    - **T/L-shaped match:** creates a wrapped candy.
    - **Same-colour 2×2 square:** creates a gift box.
-5. Activate a gift box for a **3×3 blast and free crystal coins**. Explosions can trigger nearby special candies in chain reactions. Bomb reactions use dramatic slow-motion effects, and cascades earn bonus points.
+5. Activate striped, wrapped, and colour-bomb candies by matching them or swapping them with another special candy. Their blasts can trigger further special candies in chain reactions; cascades earn bonus points.
 6. Reach the target score and complete any level objective before moves run out.
 
 ## Free tools and controls
