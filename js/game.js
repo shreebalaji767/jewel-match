@@ -274,13 +274,13 @@
         tile.setAttribute('role', 'gridcell');
         const type = gemType(board[row][col]);
         const power = gemPower(board[row][col]);
-        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'gift' ? 'bonus bomb, 3 by 3 blast' : power === 'wrapped' ? 'wrapped candy' : power === 'row' ? 'striped candy, horizontal' : power === 'column' ? 'striped candy, vertical' : 'special candy') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
+        tile.setAttribute('aria-label', TYPES.includes(type) ? type + (power ? ', ' + (power === 'color' ? 'rainbow colour bomb' : power === 'fish' ? 'candy fish, targets candies or blockers' : power === 'wrapped' ? 'wrapped candy, double explosion' : power === 'row' ? 'striped candy, clears a row' : power === 'column' ? 'striped candy, clears a column' : 'special candy') : '') + (ice[row]?.[col] ? ', frozen in ice' : '') + ', row ' + (row + 1) + ', column ' + (col + 1) : 'Empty tile');
         const gem = document.createElement('span');
         gem.className = 'gem ' + type + (power ? ' special-gem bomb-' + power : '');
         if (power) {
           const mark = document.createElement('span');
           mark.className = 'bomb-mark';
-          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'gift' ? '💣' : power === 'row' ? '↔' : '↕';
+          mark.textContent = power === 'color' ? '✹' : power === 'wrapped' ? '✚' : power === 'fish' ? '🐟' : power === 'row' ? '↔' : '↕';
           mark.setAttribute('aria-hidden', 'true');
           tile.appendChild(mark);
         }
@@ -594,6 +594,16 @@
         start = end;
       }
     }
+    // A same-colour 2×2 square is a valid special match in modes that support fish.
+    for (let row = 0; row < SIZE - 1; row++) {
+      for (let col = 0; col < SIZE - 1; col++) {
+        const type = gemType(board[row][col]);
+        if (type && gemType(board[row][col + 1]) === type &&
+            gemType(board[row + 1][col]) === type && gemType(board[row + 1][col + 1]) === type) {
+          [[row,col],[row,col+1],[row+1,col],[row+1,col+1]].forEach(([r,c]) => matched.add(r + ',' + c));
+        }
+      }
+    }
     return [...matched].map((key) => key.split(',').map(Number));
   }
 
@@ -632,7 +642,17 @@
         break;
       }
     }
-    // Four in a straight line creates a stored bonus bomb; five creates a colour bomb.
+    // A 2×2 square creates a fish; straight four creates striped; straight five creates colour.
+    if (!specialPosition) {
+      let square = null;
+      for (let row = 0; row < SIZE - 1 && !square; row++) for (let col = 0; col < SIZE - 1; col++) {
+        const type = gemType(board[row][col]);
+        if (type && [[row,col+1],[row+1,col],[row+1,col+1]].every(([r,c]) => gemType(board[r][c]) === type)) {
+          square = { row, col, type }; break;
+        }
+      }
+      if (square) specialPosition = { row: square.row, col: square.col, power: 'fish', type: square.type };
+    }
     if (!specialPosition) {
       const longRun = runs.find((run) => run.length >= 5);
       const fourRun = runs.find((run) => run.length === 4);
@@ -642,7 +662,7 @@
         specialPosition = {
           row: run.direction === 'row' ? run.row : run.row + offset,
           col: run.direction === 'row' ? run.col + offset : run.col,
-          power: run.length >= 5 ? 'color' : 'gift',
+          power: run.length >= 5 ? 'color' : run.direction,
           type: run.type
         };
       }
@@ -656,25 +676,55 @@
       queuedBombs.add(key);
       bombQueue.push({ row, col, targetType, partnerPower });
     };
-    // Special-candy combos have distinct effects: colour + colour clears the board;
-    // colour + another special converts the colour bomb into that special's colour.
+    // Resolve the six classic two-special swap combinations before individual effects.
     const forcedColourBombs = forcedBombs.filter(({ row, col }) => gemPower(board[row]?.[col]) === 'color');
-    if (forcedBombs.length > 1 && forcedColourBombs.length === 1) {
-      const colourBomb = forcedColourBombs[0];
-      const partner = forcedBombs.find((bomb) => bomb !== colourBomb);
-      if (partner) { colourBomb.targetType = gemType(board[partner.row]?.[partner.col]); colourBomb.partnerPower = gemPower(board[partner.row]?.[partner.col]); }
+    const comboCells = new Set();
+    if (forcedBombs.length > 1) {
+      const [first, second] = forcedBombs;
+      const p1 = gemPower(board[first.row]?.[first.col]), p2 = gemPower(board[second.row]?.[second.col]);
+      const centerRow = Math.round((first.row + second.row) / 2), centerCol = Math.round((first.col + second.col) / 2);
+      [first, second].forEach(({row,col}) => comboCells.add(row + ',' + col));
+      if (p1 === 'color' && p2 === 'color') {
+        for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) cleared.add(row + ',' + col);
+        message.textContent = 'COLOR BOMB + COLOR BOMB! ALMOST THE WHOLE BOARD CLEARS!';
+      } else if ((p1 === 'row' || p1 === 'column') && (p2 === 'row' || p2 === 'column')) {
+        for (let col = 0; col < SIZE; col++) cleared.add(first.row + ',' + col);
+        for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + first.col);
+        message.textContent = 'STRIPED + STRIPED! A FULL ROW AND COLUMN CLEAR!';
+      } else if ((p1 === 'wrapped' && p2 === 'wrapped')) {
+        for (let row = Math.max(0,centerRow-2); row <= Math.min(SIZE-1,centerRow+2); row++)
+          for (let col = Math.max(0,centerCol-2); col <= Math.min(SIZE-1,centerCol+2); col++) cleared.add(row + ',' + col);
+        message.textContent = 'WRAPPED + WRAPPED! DOUBLE EXPLOSION!';
+      } else if ((p1 === 'wrapped' && (p2 === 'row' || p2 === 'column')) || (p2 === 'wrapped' && (p1 === 'row' || p1 === 'column'))) {
+        for (let row = Math.max(0,centerRow-1); row <= Math.min(SIZE-1,centerRow+1); row++)
+          for (let col = 0; col < SIZE; col++) cleared.add(row + ',' + col);
+        for (let col = Math.max(0,centerCol-1); col <= Math.min(SIZE-1,centerCol+1); col++)
+          for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + col);
+        message.textContent = 'STRIPED + WRAPPED! THREE ROWS AND THREE COLUMNS BLASTED!';
+      } else if (forcedColourBombs.length === 1) {
+        const colourBomb = forcedColourBombs[0];
+        const partner = forcedBombs.find((bomb) => bomb !== colourBomb);
+        if (partner) {
+          colourBomb.targetType = gemType(board[partner.row]?.[partner.col]);
+          colourBomb.partnerPower = gemPower(board[partner.row]?.[partner.col]);
+          comboCells.delete(colourBomb.row + ',' + colourBomb.col);
+          enqueueBomb(colourBomb.row, colourBomb.col, colourBomb.targetType, colourBomb.partnerPower);
+        }
+        comboCells.delete(colourBomb.row + ',' + colourBomb.col);
+        comboCells.delete(partner.row + ',' + partner.col);
+        message.textContent = colourBomb.partnerPower === 'wrapped'
+          ? 'COLOR BOMB + WRAPPED! ONE COLOUR BECOMES WRAPPED CANDIES!'
+          : 'COLOR BOMB + STRIPED! ONE COLOUR BECOMES STRIPED BLASTS!';
+      }
     }
-    forcedBombs.forEach(({ row, col, targetType, partnerPower }) => enqueueBomb(row, col, targetType, partnerPower));
-    if (forcedBombs.length > 1 && forcedColourBombs.length > 1) {
-      for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) cleared.add(row + ',' + col);
-      message.textContent = 'RAINBOW FUSION! THE WHOLE BOARD EXPLODES!';
-    } else if (forcedBombs.length > 1) {
-      message.textContent = forcedColourBombs.length === 1 ? 'RAINBOW SUPER COMBO! One colour turns into a special-candy chain!' : 'SUPER COMBO! Special-candy blasts combine!';
-    }
-    matches.forEach(([row, col]) => {
-      if (isBomb(board[row][col])) enqueueBomb(row, col);
+    // Combo-consumed specials are not detonated a second time by their ordinary effect.
+    const triggeredBombs = new Set(comboCells);
+    forcedBombs.forEach(({ row, col, targetType, partnerPower }) => {
+      if (!comboCells.has(row + ',' + col)) enqueueBomb(row, col, targetType, partnerPower);
     });
-    const triggeredBombs = new Set();
+    matches.forEach(([row, col]) => {
+      if (isBomb(board[row][col]) && !comboCells.has(row + ',' + col)) enqueueBomb(row, col);
+    });
     while (bombQueue.length) {
       const bomb = bombQueue.shift();
       const bombKey = bomb.row + ',' + bomb.col;
@@ -689,7 +739,7 @@
         for (let row = 0; row < SIZE; row++) {
           for (let col = 0; col < SIZE; col++) {
             if (gemType(board[row][col]) !== targetType) continue;
-            if (bomb.partnerPower === 'row' || bomb.partnerPower === 'column') {
+            if (bomb.partnerPower === 'row' || bomb.partnerPower === 'column' || bomb.partnerPower === 'wrapped') {
               board[row][col] = targetType + '|' + bomb.partnerPower;
               enqueueBomb(row, col);
             } else {
@@ -699,25 +749,31 @@
         }
         message.textContent = bomb.partnerPower === 'row' || bomb.partnerPower === 'column'
           ? 'COLOUR BOMB + STRIPED CANDY! A whole colour turns into striped blasts!'
-          : 'COLOR BOMB! Every gem of that colour explodes!';
+          : bomb.partnerPower === 'wrapped'
+            ? 'COLOR BOMB + WRAPPED! A whole colour turns into wrapped explosions!'
+            : 'COLOR BOMB! Every gem of that colour explodes!';
       } else if (power === 'row') {
         for (let col = 0; col < SIZE; col++) cleared.add(bomb.row + ',' + col);
         message.textContent = 'STRIPED CANDY! The whole row clears!';
       } else if (power === 'column') {
         for (let row = 0; row < SIZE; row++) cleared.add(row + ',' + bomb.col);
         message.textContent = 'STRIPED CANDY! The whole column clears!';
-      } else if (power === 'wrapped' || power === 'gift') {
-        const radius = power === 'wrapped' ? 2 : 1;
-        for (let row = Math.max(0, bomb.row - radius); row <= Math.min(SIZE - 1, bomb.row + radius); row++) {
-          for (let col = Math.max(0, bomb.col - radius); col <= Math.min(SIZE - 1, bomb.col + radius); col++) cleared.add(row + ',' + col);
+      } else if (power === 'wrapped') {
+        for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++)
+          for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) cleared.add(row + ',' + col);
+        // Mark the second pulse separately for the dramatic two-stage wrapped-candy effect.
+        for (let row = Math.max(0, bomb.row - 1); row <= Math.min(SIZE - 1, bomb.row + 1); row++)
+          for (let col = Math.max(0, bomb.col - 1); col <= Math.min(SIZE - 1, bomb.col + 1); col++) cleared.add(row + ',' + col);
+        message.textContent = 'WRAPPED CANDY! DOUBLE EXPLOSION!';
+      } else if (power === 'fish') {
+        const candidates = [];
+        for (let row = 0; row < SIZE; row++) for (let col = 0; col < SIZE; col++) {
+          const key = row + ',' + col;
+          if (!cleared.has(key) && !(row === bomb.row && col === bomb.col)) candidates.push({row,col,ice:Boolean(ice[row][col])});
         }
-        if (power === 'gift') {
-          const giftReward = 5 + Math.min(20, currentLevel || 1);
-          crystalCoins += giftReward;
-          persistProgress();
-          showToast('🎁 Candy box opened! +' + giftReward + ' free coins!');
-          message.textContent = 'CANDY GIFT BOX! 3×3 BLAST + ' + giftReward + ' COINS!';
-        } else message.textContent = 'WRAPPED CANDY! BOOM!';
+        candidates.sort((a,b) => Number(b.ice) - Number(a.ice));
+        candidates.slice(0, 3).forEach(({row,col}) => cleared.add(row + ',' + col));
+        message.textContent = 'CANDY FISH! IT TARGETS CANDIES AND FROZEN BLOCKERS!';
       }
       // Bombs caught in an explosion chain-detonate, just like in match-three arcade games.
       for (const key of cleared) {
@@ -732,15 +788,11 @@
     if (specialPosition) {
       cleared.delete(specialPosition.row + ',' + specialPosition.col);
       board[specialPosition.row][specialPosition.col] = specialPosition.type + '|' + specialPosition.power;
-      if (specialPosition.power === 'gift') {
-        // Keep the bomb on the board for a later move, and reward the four-match.
-        const bombReward = 10;
-        crystalCoins += bombReward;
-        persistProgress();
-        message.textContent = 'FOUR-JEWEL MATCH! BONUS BOMB SAVED · +' + bombReward + ' COINS';
-        showToast('💣 Bonus bomb created! Use it in a later match · +' + bombReward + ' coins');
+      if (specialPosition.power === 'row' || specialPosition.power === 'column') {
+        message.textContent = 'FOUR-JEWEL MATCH! STRIPED CANDY CREATED!';
+        showToast('✦ Striped candy created! Swap or match it to clear a full ' + (specialPosition.power === 'row' ? 'row' : 'column') + '.');
       } else {
-        showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : '✦ Wrapped candy created!');
+        showToast(specialPosition.power === 'color' ? '✹ Color bomb created!' : specialPosition.power === 'fish' ? '🐟 Candy Fish created!' : '✦ Wrapped candy created!');
       }
     }
     const clearCoords = [...cleared].map((key) => key.split(',').map(Number));
@@ -1070,7 +1122,7 @@
   function showHowToPlay() {
     showModal({
       symbol: '✧', eyebrow: 'YOUR CRYSTAL GUIDE', title: 'How to play',
-      copy: 'Tap one gem, then an adjacent gem to swap them. Match 3 or more gems of the same colour to score points. Four in a line creates a bonus bomb that stays on the board until you match it later; it blasts a 3×3 area and awards free coins. Five in a straight line creates a colour bomb; a T/L match creates a wrapped candy with a larger blast. Match a special candy to activate it. Bigger matches and chain reactions score more. ' + (currentMode === 'daily' ? 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!' : 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!'),
+      copy: 'Match 3 to clear. Four in a straight line creates a striped candy (row or column blast); five in a line creates a Color Bomb. T/L matches create a Wrapped Candy, and a 2×2 square creates a Candy Fish in supported modes. Swap two special candies for combos: striped+striped clears a row and column; striped+wrapped clears 3 rows and 3 columns; Color Bomb+striped turns one colour into striped blasts; Color Bomb+wrapped turns one colour into wrapped blasts; wrapped+wrapped makes a double explosion; Color Bomb+Color Bomb clears almost the whole board. Striped clears a full line, Wrapped explodes twice, Color Bomb removes a colour, and Fish target candies or blockers. Coconut Wheel and Coloring Candy are reserved for special modes. ' + 'Reach ' + currentTarget.toLocaleString() + ' points before your ' + currentMoves + ' moves run out!',
       actions: [
         { label: 'Got it — let’s play', run: () => { hideModal(); if (!gameScreen.classList.contains('hidden')) paused = false; } },
         { label: 'Maybe later', run: () => { if (!gameScreen.classList.contains('hidden')) paused = false; hideModal(); } }
