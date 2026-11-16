@@ -401,6 +401,9 @@
 
   function startGame(mode = currentMode, requestedLevel = null) {
     currentMode = mode;
+    activeBooster = null;
+    undoSnapshot = null;
+    document.querySelectorAll('.booster-button').forEach((button) => button.classList.remove('booster-active'));
     if (mode === 'adventure' && Number.isSafeInteger(requestedLevel) && requestedLevel > 0) currentLevel = requestedLevel;
     else if (mode === 'adventure') currentLevel = adventureLevel;
     if (currentMode === 'daily') {
@@ -885,6 +888,7 @@
     const runId = gameRun;
     busy = true;
     activeBooster = null;
+    undoSnapshot = null;
     document.querySelectorAll('.booster-button').forEach((button) => button.classList.remove('booster-active'));
     crystalCoins -= booster.cost;
     const targetType = gemType(board[point.row][point.col]);
