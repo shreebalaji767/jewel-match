@@ -697,3 +697,12 @@ h1{font-size:clamp(42px,5.4vw,76px);line-height:1.01;letter-spacing:clamp(-2.5px
   .quick-tools .secondary-button{min-width:0;padding:8px 5px;font-size:10px;white-space:normal}
   .quick-tools .secondary-button span{overflow-wrap:anywhere}
 }
+
+
+/* Classic 9×9 match-three board */
+.game-board{grid-template-columns:repeat(9,minmax(0,1fr))!important;grid-template-rows:repeat(9,minmax(0,1fr))!important}
+.tile{aspect-ratio:1/1;min-width:0;min-height:0}
+@media(max-width:420px){
+  .game-board{gap:2px;padding:3px}
+  .tile{border-radius:4px}
+}
