@@ -92,7 +92,7 @@ The game uses relative asset paths so it can run from the repository's GitHub Pa
 
 - **Super combo scoring:** cascades use a multiplier up to ×5. Two colour bombs clear the whole board; a colour bomb paired with another special candy targets that candy's colour; other special combinations merge their blasts.
 - **Treasure chests:** every fifth victory and every 10th Sugar Trail milestone grants a free coin chest. Unused moves award bonus points and coins on victory.
-- **Infinite Sugar Trail:** 10 themed worlds cycle forever; score targets and objectives scale with level, and every 10th level is a boss with frozen tiles and a 100-coin chest.
+- **Infinite Sugar Trail:** 10 themed worlds cycle forever. Challenge tiers rise as you advance: Warm-up (1–5), Sugar Rush (6–10), Sticky (11–20), Candy Crunch (21–30), Expert Trail (31–50), and Master Trail (51+). Higher tiers raise score targets, tighten move limits, and add frozen obstacles; every 10th level is a boss with frozen tiles and a 100-coin chest.
 - **Difficulty selection:** choose Easy, Normal, Hard, or Expert. Difficulty changes target scores, available moves, and frozen-tile objectives and is saved in localStorage.
 - **Gameplay preview:** the landing page includes an original, generated looping gameplay-demo video, muted and inline for autoplay compatibility.
 - **Coin-powered boosters:** three targetable power-ups add tactical choices without purchases or paywalls. Booster costs are earned in-game, and each use clears its target before normal gravity and cascades resolve.
