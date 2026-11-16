@@ -680,11 +680,11 @@
 
     const bombQueue = [];
     const queuedBombs = new Set();
-    const enqueueBomb = (row, col, targetType = null, partnerPower = null) => {
+    const enqueueBomb = (row, col, targetType = null, partnerPower = null, direction = null) => {
       const key = row + ',' + col;
       if (queuedBombs.has(key)) return;
       queuedBombs.add(key);
-      bombQueue.push({ row, col, targetType, partnerPower });
+      bombQueue.push({ row, col, targetType, partnerPower, direction });
     };
     // Resolve the six classic two-special swap combinations before individual effects.
     const forcedColourBombs = forcedBombs.filter(({ row, col }) => gemPower(board[row]?.[col]) === 'color');
