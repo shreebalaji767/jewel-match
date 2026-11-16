@@ -760,11 +760,12 @@
         }
         message.textContent = 'COLORING CANDY! THE WHOLE COLOUR SHIMMERS AWAY!';
       } else if (power === 'coconut') {
-        const horizontal = bomb.direction !== 'column';
+        const horizontal = bomb.direction === 'left' || bomb.direction === 'right' || !bomb.direction;
+        const sign = bomb.direction === 'left' || bomb.direction === 'up' ? -1 : 1;
         const powered = [];
         for (let step = 1; step <= 3; step++) {
-          const row = bomb.row + (horizontal ? 0 : step);
-          const col = bomb.col + (horizontal ? step : 0);
+          const row = bomb.row + (horizontal ? 0 : sign * step);
+          const col = bomb.col + (horizontal ? sign * step : 0);
           if (row >= SIZE || col >= SIZE) break;
           if (board[row][col] !== null) {
             board[row][col] = gemType(board[row][col]) + '|' + (horizontal ? 'row' : 'column');
@@ -901,7 +902,7 @@
       const power = gemPower(board[point.row][point.col]);
       return { ...point, targetType: (power === 'color' || power === 'coloring') && !isBomb(board[other.row][other.col]) ? gemType(board[other.row][other.col]) : null,
         partnerPower: power === 'color' ? gemPower(board[other.row][other.col]) : null,
-        direction: first.row === second.row ? 'row' : 'column' };
+        direction: first.row === second.row ? (second.col > first.col ? 'right' : 'left') : (second.row > first.row ? 'down' : 'up') };
     });
     if (!matches.length && !swappedBombs.length) {
       await sleep(150);
